@@ -3,7 +3,7 @@
 A complete, local-first job-hunt system for Claude Cowork. Your data never
 leaves your computer: a kanban tracker app lives in a folder you own, and
 Claude skills do the legwork around it — finding and fit-scoring openings
-against *your* thesis, watching your inbox for replies, and tailoring your
+against *your* thesis, checking your inbox for replies, and tailoring your
 resume and cover letter for every role you decide to chase.
 
 Job Hunt HQ makes you faster and more thorough — but you stay the one who
@@ -23,7 +23,7 @@ No accounts, no cloud, no build step. Works standalone even without Claude.
 |---|---|
 | `setup-job-tracker` | Installs the app into your folder, interviews you to build your Job Thesis and Master Resume, offers the automations |
 | `job-scrub` | Searches job boards for new roles, fit-scores each 0–100 against your thesis, captures the posting text, adds them to Screening (sorted by fit) |
-| `reply-monitor` | Scans your email for application replies and advances the matching cards |
+| `reply-monitor` | Checks your email for application replies (scheduled or on demand) and advances the matching cards |
 | `generate-docs` | Tailors a resume + cover letter (.md + .docx) for each To Apply role, from the real posting |
 | `docs-cleanup` | Archives materials for roles you've finished applying to |
 
@@ -52,8 +52,10 @@ creates. You'll manage cards by hand; see `app/README.md`.
 ## The loop
 
 New roles land in Screening (daily scrub or on demand) → you drag keepers to
-To Apply → documents get generated → you apply and move the card → replies
-advance it automatically. You do the judgment; Claude does the legwork.
+To Apply → documents get generated → you apply and move the card → the next
+reply check advances it for you. Nothing runs "live" — everything happens on
+the schedules you choose, or the moment you ask. You do the judgment; Claude
+does the legwork.
 
 **How documents get generated:** moving a card to To Apply is the signal.
 Then, whichever you set up — an hourly/daily sweep runs on its own, you click
