@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Job Hunt HQ — a local-first job-hunt system for Claude</title>
+<meta name="description" content="A kanban job tracker that lives in a folder you own, plus Claude skills that find, fit-score, and tailor. Never auto-applies. Free and open source (MIT).">
+<meta property="og:title" content="Job Hunt HQ">
+<meta property="og:description" content="Your job hunt in a folder you own. Claude does the legwork; you stay the one who applies.">
+<style>
+:root{
+  --bg:#f7f5f0;--card:#ffffff;--ink:#1f2a2e;--muted:#5c6b70;--accent:#1F4E5F;
+  --accent-soft:#e3edf0;--border:#e2ddd2;--good:#2e8b57;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#14181a;--card:#1d2326;--ink:#e8e4da;--muted:#9aa7ac;--accent:#7fb3c4;
+  --accent-soft:#22323a;--border:#2c3438;--good:#5fbd8b;}
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:Georgia,'Times New Roman',serif;background:var(--bg);color:var(--ink);line-height:1.65}
+.wrap{max-width:880px;margin:0 auto;padding:0 24px}
+header{padding:72px 0 48px;text-align:center}
+h1{font-size:44px;letter-spacing:-.5px}
+.tag{font-size:20px;color:var(--muted);max-width:620px;margin:14px auto 0}
+.cta{margin-top:32px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-block;padding:13px 26px;border-radius:10px;text-decoration:none;
+  font-family:system-ui,sans-serif;font-size:15px;font-weight:600}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-ghost{border:1.5px solid var(--accent);color:var(--accent)}
+.notice{font-family:system-ui,sans-serif;font-size:13px;color:var(--muted);margin-top:14px}
+section{padding:40px 0}
+h2{font-size:26px;margin-bottom:18px;color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.card h3{font-family:system-ui,sans-serif;font-size:15px;margin-bottom:8px}
+.card p{font-size:15px;color:var(--muted)}
+.loop{background:var(--accent-soft);border-radius:14px;padding:26px 28px;font-size:17px}
+.loop b{color:var(--accent)}
+code,pre{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13.5px;
+  background:var(--card);border:1px solid var(--border);border-radius:8px}
+code{padding:2px 7px}
+pre{padding:14px 18px;overflow-x:auto;margin-top:10px}
+.dont{border-left:4px solid var(--good);padding-left:18px;margin:10px 0}
+.dont p{margin:8px 0;font-size:16px}
+footer{padding:48px 0 64px;text-align:center;color:var(--muted);font-family:system-ui,sans-serif;font-size:14px;border-top:1px solid var(--border);margin-top:40px}
+footer a{color:var(--accent)}
+.shot{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;
+  font-family:system-ui,sans-serif;font-size:13px;color:var(--muted);text-align:center}
+.cols{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.col{flex:1;min-width:96px;background:var(--accent-soft);border-radius:8px;padding:10px 8px;font-weight:600;color:var(--accent)}
+.col small{display:block;font-weight:400;color:var(--muted);margin-top:4px}
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <h1>Job Hunt HQ</h1>
+  <p class="tag">Your job hunt in a folder you own. A kanban tracker with no cloud and no accounts, plus Claude skills that find, fit-score, and tailor — while you stay the one who applies.</p>
+  <div class="cta">
+    <a class="btn btn-primary" href="https://github.com/zaridan/job-hunt-hq/releases/latest/download/job-hunt-hq.plugin">Download the plugin</a>
+    <a class="btn btn-ghost" href="https://github.com/zaridan/job-hunt-hq">View on GitHub</a>
+  </div>
+  <p class="notice">Free &amp; open source · MIT · your data never leaves your computer</p>
+</header>
+
+<section class="wrap">
+  <div class="shot">
+    Six stages, one board, one <code>data.json</code> on your disk
+    <div class="cols">
+      <div class="col">Screening<small>new finds, sorted by fit</small></div>
+      <div class="col">To Apply<small>your keepers</small></div>
+      <div class="col">Applied<small>docs attached</small></div>
+      <div class="col">Phone Screen</div>
+      <div class="col">Interviewing</div>
+      <div class="col">Offer</div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>The loop</h2>
+  <div class="loop">
+    New roles land in <b>Screening</b>, each fit-scored 0–100 against your personal job thesis → you drag the keepers to <b>To Apply</b> → a tailored resume and cover letter get written from the real posting → you proofread, apply, and move the card → replies in your inbox advance it automatically. You do the judgment; Claude does the legwork.
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>What's inside</h2>
+  <div class="grid">
+    <div class="card"><h3>🧭 Guided setup</h3><p>A 15-minute interview builds your Job Thesis — an honest, tiered definition of what a "fit" means for you — and your Master Resume. Everything downstream follows it.</p></div>
+    <div class="card"><h3>🔎 Job scrub</h3><p>Searches job boards, dedupes against your tracker, fit-scores every role, and captures the posting text so nothing depends on links staying alive.</p></div>
+    <div class="card"><h3>📄 Tailored documents</h3><p>Resume + cover letter per role, built only from your master copy and the actual posting. Never invented, never generic. Drafts you proofread.</p></div>
+    <div class="card"><h3>📬 Reply monitor</h3><p>Watches your email for recruiter replies and moves cards to Phone Screen, Interviewing, or Rejected — no manual bookkeeping.</p></div>
+    <div class="card"><h3>🗂 Local-first tracker</h3><p>One HTML page and a tiny Python server. Atomic saves, rolling backups, optional git history. Works standalone, even without Claude.</p></div>
+    <div class="card"><h3>💬 Customize by asking</h3><p>No settings screens. "Add Otta to my scrub." "Keep cover letters under 250 words." The system is plain files and skills Claude can edit.</p></div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>What it doesn't do</h2>
+  <div class="dont">
+    <p><strong>It never applies for you.</strong> No auto-submitting, no posting your resume to boards, no sending email on your behalf. Recruiters can tell when applications are automated — every application is you, clicking submit.</p>
+    <p><strong>It doesn't replace your judgment.</strong> Fit scores are triage, not verdicts. Drafts are drafts — read them like anything with your signature on it.</p>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>Get started</h2>
+  <p>In Claude's Cowork mode: install the plugin, create a new project with a folder, and say <em>"set up my job tracker."</em> That's the whole install.</p>
+  <p style="margin-top:12px">Claude Code users can install from the marketplace instead:</p>
+  <pre>/plugin marketplace add zaridan/job-hunt-hq
+/plugin install job-hunt-hq@job-hunt-hq</pre>
+  <p style="margin-top:12px">No Claude? The tracker works standalone — see the <a href="https://github.com/zaridan/job-hunt-hq#getting-started-claude-cowork" style="color:var(--accent)">README</a>.</p>
+</section>
+
+<footer>
+  <div class="wrap">
+    MIT © 2026 <a href="https://github.com/zaridan">Zaridan</a> (TJ Baker) ·
+    <a href="https://github.com/zaridan/job-hunt-hq">GitHub</a> ·
+    <a href="https://github.com/zaridan/job-hunt-hq/releases">Releases</a> ·
+    <a href="https://github.com/zaridan/job-hunt-hq/issues">Issues</a>
+  </div>
+</footer>
+
+</body>
+</html>
