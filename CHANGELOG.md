@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.5 — 2026-07-02
+- Fit score: job-scrub rates every new role 0-100 against the Job Thesis;
+  the app shows the score on cards and sorts Screening by fit.
+- Posting capture: the scrub saves each job description to Job Listings/,
+  so document generation works even after a posting goes down;
+  generate-docs reads the saved copy first.
+- README: explicit no-auto-apply stance and a JobOps comparison.
+
 ## 0.1.4 — 2026-07-02
 - Setup interview: batched question rounds, never re-asks answered questions,
   follow-ups reference the prior answer.

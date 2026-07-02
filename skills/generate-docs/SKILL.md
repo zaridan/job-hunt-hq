@@ -15,8 +15,8 @@ For each To Apply card without documents: fetch the real posting, tailor from th
 ## Step 1 — Select cards
 Entries where status == "To Apply", all of resumeMD / coverMD / resumeLink / coverLink are empty/absent, and notes does not contain "[docs:" (a prior failure/skip marker — the user deletes the marker to request a retry). If none: report that in one line and stop. Process at most 4 per run, oldest first.
 
-## Step 2 — Fetch the posting
-Fetch the card's `url` (browser tools if the page is client-rendered and available). If unreachable, login-gated, expired, or a different role: append "[docs: skipped YYYY-MM-DD — <reason>]" to notes and move on. A mirror found by web search is acceptable only if it is unambiguously the same role. If the description is too thin to tailor against, treat as a skip.
+## Step 2 — Get the job description
+FIRST check `<root>/Job Listings/<Company> - <Role>.md` — the job scrub saves captured postings there. If present and substantive, use it (no fetch needed). Otherwise fetch the card's `url` (browser tools if the page is client-rendered and available). If unreachable, login-gated, expired, or a different role: append "[docs: skipped YYYY-MM-DD — <reason>]" to notes and move on. A mirror found by web search is acceptable only if it is unambiguously the same role. When a fetch succeeds, save the description to `<root>/Job Listings/<Company> - <Role>.md` for next time. If the description is too thin to tailor against, treat as a skip.
 
 ## Step 3 — Tailor
 Read `Job-Thesis.md` (positioning honesty rules), `Resume/Master-Resume.md` (trim/reorder from it, never invent), and `Cover Letters/Cover-Letter-Template.md` (structure, header block, 250-350 words). Mirror the posting's actual keywords truthfully. The cover letter opens with a specific, genuine hook about THIS company.

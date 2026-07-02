@@ -2,9 +2,13 @@
 
 A complete, local-first job-hunt system for Claude Cowork. Your data never
 leaves your computer: a kanban tracker app lives in a folder you own, and
-Claude skills do the legwork around it — finding openings that match *your*
-thesis, watching your inbox for replies, and tailoring your resume and cover
-letter for every role you decide to chase.
+Claude skills do the legwork around it — finding and fit-scoring openings
+against *your* thesis, watching your inbox for replies, and tailoring your
+resume and cover letter for every role you decide to chase.
+
+It does not auto-apply, ever. Recruiters can tell when applications are
+automated, and it burns your credibility. Job Hunt HQ makes you faster and
+more thorough; you stay the one who applies.
 
 ## What you get
 
@@ -19,7 +23,7 @@ No accounts, no cloud, no build step. Works standalone even without Claude.
 | Skill | What it does |
 |---|---|
 | `setup-job-tracker` | Installs the app into your folder, interviews you to build your Job Thesis and Master Resume, offers the automations |
-| `job-scrub` | Searches job boards for new roles matching your thesis, dedupes, adds them to Screening |
+| `job-scrub` | Searches job boards for new roles, fit-scores each 0–100 against your thesis, captures the posting text, adds them to Screening (sorted by fit) |
 | `reply-monitor` | Scans your email for application replies and advances the matching cards |
 | `generate-docs` | Tailors a resume + cover letter (.md + .docx) for each To Apply role, from the real posting |
 | `docs-cleanup` | Archives materials for roles you've finished applying to |
@@ -62,6 +66,15 @@ Two guardrails run through every skill: documents are never written against
 a posting Claude couldn't actually read, and nothing is ever added to your
 resume that isn't in your master copy. The Job Thesis includes a "background
 reality check" so searches target roles your track record actually supports.
+
+## How this compares to JobOps
+
+[JobOps](https://github.com/DaKheera47/job-ops) is excellent and much bigger:
+a self-hosted Docker product with its own scrapers, UI, and AI-provider
+config. Choose it if you want a full application platform you run as a
+service. Choose Job Hunt HQ if you want your job hunt to live in a plain
+folder — no Docker, no API keys, one Python file — with Claude supplying the
+intelligence through skills you can read and edit as text.
 
 ## License
 

@@ -89,6 +89,7 @@ footer{color:var(--muted);font-size:12px;margin-top:22px;display:flex;gap:14px;f
 .filechip.warn{color:#8a6d1f;border-color:#f0d9a8;background:#fff7e6}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:80;max-width:80vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.fitb{font-weight:600}.fit-hi{color:#2e8b57}.fit-mid{color:#c79a3a}.fit-lo{color:#9aa7ac}
 </style>
 </head>
 <body>
@@ -372,13 +373,14 @@ function kpis(list){const c=s=>list.filter(a=>a.status===s).length;
   document.getElementById('kpis').innerHTML=k.map(x=>`<div class="kpi"><div class="n">${x[1]}</div><div class="l">${x[0]}</div></div>`).join('');}
 
 
+function fitCls(v){const n=parseInt(v)||0;return n>=85?'fit-hi':n>=70?'fit-mid':'fit-lo';}
 function card(a){
   const link=a.url&&a.url.startsWith('http')?`<a class="btnlink" href="${esc(a.url)}" target="_blank" rel="noopener">Open posting ↗</a>`:'';
   return `<details class="cardx" draggable="true" data-id="${a.id}">
     <summary>
       <div class="co">${esc(a.company)}</div>
       <div class="ro">${esc(a.role)}</div>
-      <div class="meta">${a.salary?`<span>${esc(a.salary)}</span>`:''}${a.arrangement?`<span>${esc(a.arrangement)}</span>`:''}${a.nextFollowup?`<span class="${dueClass(a.nextFollowup)}">⏰ ${esc(a.nextFollowup)}</span>`:''}${a.excitement?`<span>★ ${esc(a.excitement)}</span>`:''}${docBadge(a)}</div>
+      <div class="meta">${a.salary?`<span>${esc(a.salary)}</span>`:''}${a.arrangement?`<span>${esc(a.arrangement)}</span>`:''}${a.nextFollowup?`<span class="${dueClass(a.nextFollowup)}">⏰ ${esc(a.nextFollowup)}</span>`:''}${a.fitScore?`<span class="fitb ${fitCls(a.fitScore)}">◎ ${esc(a.fitScore)}</span>`:''}${a.excitement?`<span>★ ${esc(a.excitement)}</span>`:''}${docBadge(a)}</div>
     </summary>
     <div class="body">
       <p>${pill(a.status)}${a.dateApplied?` · applied ${esc(a.dateApplied)}`:''}${a.source?` · ${esc(a.source)}`:''}</p>
@@ -392,6 +394,7 @@ function renderBoard(list){const hide=document.getElementById('sc').checked;
   const stages=STAGES.filter(s=>!(s.hide&&hide));
   document.getElementById('board').innerHTML=stages.map(s=>{
     const items=list.filter(a=>stageOf(a.status)===s.key);
+    if(s.key==='Screening')items.sort((x,y)=>(parseInt(y.fitScore)||0)-(parseInt(x.fitScore)||0));
     return `<div class="col" data-col="${esc(s.key)}"><h2>${esc(s.key)}<span class="ct">${items.length}</span></h2>${items.map(card).join('')||'<div style="font-size:12px;color:#9aa7ac;padding:4px">drop here</div>'}</div>`;
   }).join('');
   wireDnD();}
