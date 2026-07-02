@@ -12,11 +12,19 @@
       "name": "job-hunt-hq",
       "source": "./",
       "description": "A complete local-first job-hunt system: a kanban tracker app that lives in your own folder, plus skills that find matching openings, monitor your email for replies, tailor your resume and cover letter per role, and keep your application materials organized.",
-      "author": { "name": "Zaridan (TJ Baker)" },
+      "author": {
+        "name": "Zaridan (TJ Baker)"
+      },
       "license": "MIT",
       "category": "productivity",
-      "keywords": ["job-search", "job-tracker", "resume", "cover-letter", "career"],
-      "homepage": "https://github.com/zaridan/job-hunt-hq"
+      "keywords": [
+        "job-search",
+        "job-tracker",
+        "resume",
+        "cover-letter",
+        "career"
+      ],
+      "homepage": "https://zaridan.github.io/job-hunt-hq/"
     }
   ]
 }
