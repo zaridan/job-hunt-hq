@@ -19,22 +19,22 @@
 *{box-sizing:border-box;margin:0}
 body{font-family:Georgia,'Times New Roman',serif;background:var(--bg);color:var(--ink);line-height:1.65}
 .wrap{max-width:880px;margin:0 auto;padding:0 24px}
-header{padding:72px 0 48px;text-align:center}
+header{padding:96px 0 56px;text-align:center}
 h1{font-size:44px;letter-spacing:-.5px}
-.tag{font-size:20px;color:var(--muted);max-width:620px;margin:14px auto 0}
-.cta{margin-top:32px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.tag{font-size:20px;color:var(--muted);max-width:640px;margin:18px auto 0;line-height:1.6}
+.cta{margin-top:36px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
 .btn{display:inline-block;padding:13px 26px;border-radius:10px;text-decoration:none;
   font-family:system-ui,sans-serif;font-size:15px;font-weight:600}
 .btn-primary{background:var(--accent);color:#fff}
 .btn-ghost{border:1.5px solid var(--accent);color:var(--accent)}
 .notice{font-family:system-ui,sans-serif;font-size:13px;color:var(--muted);margin-top:14px}
-section{padding:40px 0}
-h2{font-size:26px;margin-bottom:18px;color:var(--accent)}
+section{padding:36px 0 44px}
+h2{font-size:26px;margin-bottom:22px;color:var(--accent)}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
 .card h3{font-family:system-ui,sans-serif;font-size:15px;margin-bottom:8px}
 .card p{font-size:15px;color:var(--muted)}
-.loop{background:var(--accent-soft);border-radius:14px;padding:26px 28px;font-size:17px}
+.loop{background:var(--accent-soft);border-radius:14px;padding:28px 32px;font-size:17px;line-height:1.75}
 .loop b{color:var(--accent)}
 code,pre{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13.5px;
   background:var(--card);border:1px solid var(--border);border-radius:8px}
@@ -42,12 +42,12 @@ code{padding:2px 7px}
 pre{padding:14px 18px;overflow-x:auto;margin-top:10px}
 .dont{border-left:4px solid var(--good);padding-left:18px;margin:10px 0}
 .dont p{margin:8px 0;font-size:16px}
-footer{padding:48px 0 64px;text-align:center;color:var(--muted);font-family:system-ui,sans-serif;font-size:14px;border-top:1px solid var(--border);margin-top:40px}
+footer{padding:56px 0 72px;text-align:center;color:var(--muted);font-family:system-ui,sans-serif;font-size:14px;border-top:1px solid var(--border);margin-top:40px}
 footer a{color:var(--accent)}
-.shot{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;
+.shot{margin-top:8px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;
   font-family:system-ui,sans-serif;font-size:13px;color:var(--muted);text-align:center}
 .cols{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-.col{flex:1;min-width:96px;background:var(--accent-soft);border-radius:8px;padding:10px 8px;font-weight:600;color:var(--accent)}
+.col{flex:1;min-width:96px;background:var(--accent-soft);border-radius:8px;padding:12px 8px;font-weight:600;color:var(--accent);display:flex;flex-direction:column;justify-content:center}
 .col small{display:block;font-weight:400;color:var(--muted);margin-top:4px}
 </style>
 </head>
@@ -60,7 +60,7 @@ footer a{color:var(--accent)}
     <a class="btn btn-primary" href="https://github.com/zaridan/job-hunt-hq/releases/latest/download/job-hunt-hq.plugin">Download the plugin</a>
     <a class="btn btn-ghost" href="https://github.com/zaridan/job-hunt-hq">View on GitHub</a>
   </div>
-  <p class="notice">Free &amp; open source · MIT · your data never leaves your computer</p>
+  <p class="notice" style="margin-top:18px">Free &amp; open source · MIT · your data never leaves your computer</p>
 </header>
 
 <section class="wrap">
@@ -118,7 +118,9 @@ footer a{color:var(--accent)}
     MIT © 2026 <a href="https://github.com/zaridan">Zaridan</a> (TJ Baker) ·
     <a href="https://github.com/zaridan/job-hunt-hq">GitHub</a> ·
     <a href="https://github.com/zaridan/job-hunt-hq/releases">Releases</a> ·
-    <a href="https://github.com/zaridan/job-hunt-hq/issues">Issues</a>
+    <a href="https://github.com/zaridan/job-hunt-hq/issues">Issues</a> ·
+    <a href="https://github.com/zaridan/job-hunt-hq/blob/main/CONTRIBUTING.md">Contribute</a> ·
+    <a href="privacy.html">Privacy</a>
   </div>
 </footer>
 

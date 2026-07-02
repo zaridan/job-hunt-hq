@@ -118,6 +118,14 @@ things like:
 
 If a customization works well, it persists — the files are the memory.
 
+## Contributing
+
+Contributions welcome, and they don't have to be big — the automations are
+plain-English skill files, so you can improve them without writing code. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for the short version (it really is
+short: open an issue or a PR; keep it zero-dependency, local-first, and
+never-auto-apply).
+
 ## License
 
 MIT — © 2026 Zaridan (TJ Baker)
