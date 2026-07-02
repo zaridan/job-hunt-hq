@@ -32,7 +32,9 @@ No accounts, no cloud, no build step. Works standalone even without Claude.
 The smoothest path, as field-tested:
 
 1. Install the plugin: **[download the latest `.plugin` file](https://github.com/zaridan/job-hunt-hq/releases/latest/download/job-hunt-hq.plugin)**
-   and open it in Claude (or add it via Settings → Capabilities).
+   and open it in Claude (or add it via Settings → Capabilities). Claude Code
+   users can instead run `/plugin marketplace add zaridan/job-hunt-hq` then
+   `/plugin install job-hunt-hq@job-hunt-hq`.
 2. In Claude's Cowork mode, create a **new project** and select a folder for
    it — that folder becomes your job-hunt home.
 3. Say **"set up my job tracker"**. That's it — no other instructions needed.
