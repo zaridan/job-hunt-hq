@@ -67,7 +67,7 @@ If the user has a resume (any format), convert it into `Resume/Master-Resume.md`
 
 1. **Daily job scrub** — a scheduled task (suggest 7 AM) running the `job-scrub` skill's workflow against their thesis.
 2. **Reply monitor** — a scheduled task (suggest 8 AM) running the `reply-monitor` workflow. Requires an ~~email connector; check `${CLAUDE_PLUGIN_ROOT}/CONNECTORS.md`.
-3. **Tailored docs** — either a scheduled sweep or an on-demand artifact: create an ad-hoc scheduled task from the `generate-docs` workflow, then a pinned artifact page whose button triggers it via `runScheduledTask`.
+3. **Tailored docs** — either a scheduled sweep or an on-demand artifact: create an ad-hoc scheduled task from the `generate-docs` workflow, then an artifact page whose button triggers it via `runScheduledTask`. If the artifact is created, explicitly tell the user (in the handoff too): "Pin the Generate Now page in your Cowork sidebar — artifacts are easy to miss unpinned."
 4. **Nightly docs cleanup** — scheduled task (suggest 10 PM) running `Job Tracker App/cleanup_applied.py`.
 
 For any scheduled task created, write the prompt to be fully self-contained (each run has no memory): include the user's folder paths and the rules from the corresponding skill in this plugin. Recommend the user click "Run now" once per task to pre-approve its tools.

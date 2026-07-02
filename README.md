@@ -53,6 +53,10 @@ New roles land in Screening (daily scrub or on demand) → you drag keepers to
 To Apply → documents get generated → you apply and move the card → replies
 advance it automatically. You do the judgment; Claude does the legwork.
 
+> **Tip:** if you set up the on-demand "Generate Now" button during setup, it
+> lives as an artifact in Claude — **pin it** in the Cowork sidebar so it's
+> always one click away. It's easy to miss unpinned.
+
 ## Connectors
 
 Optional but recommended — see `CONNECTORS.md`. Job-board connectors
