@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.6 — 2026-07-02
+- Docs: first-run folder-access note — Claude asks permission to open your
+  job-hunt folder during setup and again on new sessions, or the first time an
+  automation or the Generate Now button runs. Approve it; a pending or expired
+  prompt is the usual reason a scrub, reply check, or button "does nothing."
+- Docs: how to open the tracker — just ask Claude "open my job tracker" (always
+  works, even when the icon is fussy), or use the launcher icon. If the icon
+  won't open, Claude can rebuild the shortcut. Added to README, the setup
+  handoff, and START-HERE.
+- Setup skill: the on-demand Generate Now task must stay registered as a
+  manual-only ad-hoc task — deleting it to "pause" generation makes the button
+  silently fail.
+
 ## 0.1.5 — 2026-07-02
 - Fit score: job-scrub rates every new role 0-100 against the Job Thesis;
   the app shows the score on cards and sorts Screening by fit.

@@ -67,7 +67,7 @@ If the user has a resume (any format), convert it into `Resume/Master-Resume.md`
 
 1. **Daily job scrub** — a scheduled task (suggest 7 AM) running the `job-scrub` skill's workflow against their thesis.
 2. **Reply monitor** — a scheduled task (suggest 8 AM) running the `reply-monitor` workflow. Requires an ~~email connector; check `${CLAUDE_PLUGIN_ROOT}/CONNECTORS.md`.
-3. **Tailored docs** — either a scheduled sweep or an on-demand artifact: create an ad-hoc scheduled task from the `generate-docs` workflow, then an artifact page whose button triggers it via `runScheduledTask`. If the artifact is created, explicitly tell the user (in the handoff too): "Pin the Generate Now page in your Cowork sidebar — artifacts are easy to miss unpinned."
+3. **Tailored docs** — either a scheduled sweep or an on-demand artifact: create an ad-hoc scheduled task from the `generate-docs` workflow, then an artifact page whose button triggers it via `runScheduledTask`. The button only works while that ad-hoc task stays registered under the exact ID the artifact calls — to pause doc generation, keep the task **manual-only (ad-hoc); never delete it**, or the button will silently fail. If the artifact is created, explicitly tell the user (in the handoff too): "Pin the Generate Now page in your Cowork sidebar — artifacts are easy to miss unpinned."
 4. **Nightly docs cleanup** — scheduled task (suggest 10 PM) running `Job Tracker App/cleanup_applied.py`.
 
 For any scheduled task created, write the prompt to be fully self-contained (each run has no memory): include the user's folder paths and the rules from the corresponding skill in this plugin. Recommend the user click "Run now" once per task to pre-approve its tools.
@@ -77,8 +77,8 @@ For any scheduled task created, write the prompt to be fully self-contained (eac
 Launch the app FOR the user (open the launcher created in Step 2; don't tell them to run anything). Confirm the status chip reads "data.json · server-synced".
 
 The handoff message must pass the non-technical-reader test:
-- Plain language only. NO terminal commands, no `cd`, no `python3`, no ports, no localhost URLs, no escaped file paths. "Open Job Tracker from your Applications folder / desktop icon" is the only launch instruction that should ever appear.
-- No implementation details (servers, JSON, sync, backups). One reassurance sentence is allowed: "Everything lives in your <folder> folder on your computer — nothing goes to the cloud."
+- Plain language only. NO terminal commands, no `cd`, no `python3`, no ports, no localhost URLs, no escaped file paths. To open the board, give BOTH easy options: "just ask me to open your job tracker" AND "or double-click the Job Tracker launcher icon in your Applications folder / on your desktop." Add that if the icon ever won't open, they can always just ask you — and that you can rebuild the shortcut for them.
+- No implementation details (servers, JSON, sync, backups). One reassurance sentence is allowed: "Everything lives in your <folder> folder on your computer — nothing goes to the cloud." Also tell them, in plain words, that you'll occasionally ask permission to open that folder — on a new session, or when an automation or the Generate Now button runs — and that they should just approve it, since that access is what lets the tools do their work.
 - Keep it short: what got set up (in their words — "your board", "your resume file"), the loop in 3-4 plain sentences (new roles appear in Screening → drag the ones you like to To Apply → documents get written for you → apply and drag the card along), and ONE clear next action, not a week-by-week plan.
 - If the user seems technical (they asked about ports, git, code), match their level instead — this rule is about defaults, not ability.
 

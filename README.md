@@ -39,11 +39,32 @@ The smoothest path, as field-tested:
    it — that folder becomes your job-hunt home.
 3. Say **"set up my job tracker"**. That's it — no other instructions needed.
 
+> **First run — granting folder access.** The first time Claude works in your
+> job-hunt folder, it asks your permission to access that folder — and it may
+> ask again on a later session, or the first time a scheduled task or the
+> **Generate Now** button runs. Approve it: that access is what lets the skills
+> read and write your files. If a scrub, a reply check, or the Generate Now
+> button ever seems to do nothing, a pending or expired access prompt is the
+> usual cause — re-grant access and run it again.
+
 Setup takes about 15 minutes — most of it the interview that builds your Job
 Thesis, the honest, tiered definition of what a "fit" means for you. Every
 automated search and every tailored document is judged against it. When it
-finishes, the tracker opens on its own; from then on you launch it from its
-icon.
+finishes, the tracker opens on its own; after that, open it whichever way is
+easiest (see below).
+
+### Opening the tracker
+
+Two ways — use whichever you like:
+
+- **Just ask Claude.** Say **"open my job tracker"** in Cowork and Claude
+  launches it for you. This always works, even when the icon is being fussy.
+- **Use the launcher icon.** Setup creates a one-click launcher (a desktop or
+  Applications shortcut). Double-click it to open the board without Claude.
+
+The launcher shortcut can occasionally be finicky depending on your OS and
+security settings. If yours won't open, just ask Claude to open the tracker —
+or say **"recreate my job tracker shortcut"** and Claude will rebuild it.
 
 **No Claude?** The tracker app works standalone: run
 `python3 app/install.py --target <your folder>` and use the launcher it

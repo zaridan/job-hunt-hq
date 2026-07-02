@@ -1,7 +1,13 @@
 # Job Hunt — Start Here
 
-Your command center. The board lives in `Job Tracker App/` — launch it with
-your app icon or `python3 "Job Tracker App/launch.py"`.
+Your command center. The board lives in `Job Tracker App/` — open it by asking
+Claude **"open my job tracker,"** or double-click your Job Tracker launcher
+icon. (If the icon ever won't open, just ask Claude — it can rebuild the
+shortcut.)
+
+> Claude will occasionally ask permission to open this folder — on a new
+> session, or when an automation or the Generate Now button runs. Just approve
+> it; that access is what lets it help.
 
 ## The loop
 1. **Find roles.** New matches land in the **Screening** column
