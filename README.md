@@ -53,6 +53,18 @@ New roles land in Screening (daily scrub or on demand) → you drag keepers to
 To Apply → documents get generated → you apply and move the card → replies
 advance it automatically. You do the judgment; Claude does the legwork.
 
+**How documents get generated:** moving a card to To Apply is the signal.
+Then, whichever you set up — an hourly/daily sweep runs on its own, you click
+the **Generate Now** button, or you just tell Claude "generate my application
+docs." Claude reads the actual posting (captured at scrub time or fetched
+fresh), trims and reorders your Master Resume to match it — never inventing
+anything — and writes a cover letter with a real hook about that company. The
+results land in two places: 📄/✉ buttons on the card itself (view or
+print-to-PDF), and ready-to-send `.docx` files in your `Resume/Tailored/` and
+`Cover Letters/Tailored/` folders. Cards that already have documents are
+never regenerated. Proofread before you send — they're drafts with your name
+on them.
+
 > **Tip:** if you set up the on-demand "Generate Now" button during setup, it
 > lives as an artifact in Claude — **pin it** in the Cowork sidebar so it's
 > always one click away. It's easy to miss unpinned.
