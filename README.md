@@ -6,9 +6,8 @@ Claude skills do the legwork around it — finding and fit-scoring openings
 against *your* thesis, watching your inbox for replies, and tailoring your
 resume and cover letter for every role you decide to chase.
 
-It does not auto-apply, ever. Recruiters can tell when applications are
-automated, and it burns your credibility. Job Hunt HQ makes you faster and
-more thorough; you stay the one who applies.
+Job Hunt HQ makes you faster and more thorough — but you stay the one who
+applies. See "What it doesn't do" below.
 
 ## What you get
 
@@ -67,14 +66,39 @@ a posting Claude couldn't actually read, and nothing is ever added to your
 resume that isn't in your master copy. The Job Thesis includes a "background
 reality check" so searches target roles your track record actually supports.
 
-## How this compares to JobOps
+## What it doesn't do
 
-[JobOps](https://github.com/DaKheera47/job-ops) is excellent and much bigger:
-a self-hosted Docker product with its own scrapers, UI, and AI-provider
-config. Choose it if you want a full application platform you run as a
-service. Choose Job Hunt HQ if you want your job hunt to live in a plain
-folder — no Docker, no API keys, one Python file — with Claude supplying the
-intelligence through skills you can read and edit as text.
+- **It never applies for you.** No auto-submitting applications, no posting
+  your resume to boards, no sending email on your behalf. Recruiters can
+  tell when applications are automated, and it burns your credibility. Every
+  application is you, clicking submit.
+- **It doesn't replace your judgment.** Fit scores are a triage aid, not a
+  verdict — you decide what's worth chasing.
+- **Its drafts are drafts.** Always proofread the generated resume and cover
+  letter before submitting. They're built only from your master resume and
+  the real posting, but you own every word that goes out under your name.
+  Read them the way you'd read anything with your signature on it.
+
+## Make it yours
+
+There are no settings screens — the whole system is plain files and skills
+Claude can read and edit, so you customize it by asking. After setup, try
+things like:
+
+- **Change what "a fit" means:** edit `Job-Thesis.md` yourself, or say
+  "update my job thesis — I'm now open to hybrid in Denver" and every future
+  scrub and document follows suit.
+- **Add job boards:** "also cover Otta and RemoteOK in my job scrub" — the
+  scrub is instructions, not code, so new sources are one sentence.
+- **Tune the cadence:** "run the scrub twice a day" or "pause the reply
+  monitor while I'm on vacation."
+- **Shape the documents:** "keep my cover letters under 250 words" or "always
+  lead my resume with the platform-migration story."
+- **Extend the tracker:** "add a Referrals column to the board" or "track
+  which applications came from referrals" — the app is one readable HTML
+  file, and Claude can modify your copy safely (it's git-versioned).
+
+If a customization works well, it persists — the files are the memory.
 
 ## License
 
