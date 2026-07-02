@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Hunt — Tracker</title>
+<style>
+:root{
+  --ink:#1F4E5F;--ink2:#2c7a93;--bg:#f4f6f7;--card:#fff;--line:#e2e8ea;
+  --muted:#6b7c82;--text:#23323a;--gold:#c79a3a;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{background:var(--ink);color:#fff;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+header h1{margin:0;font-size:18px}
+header .sub{opacity:.85;font-size:12px}
+.seg{display:inline-flex;border:1px solid rgba(255,255,255,.4);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:transparent;color:#fff;padding:6px 13px;font-size:13px;cursor:pointer}
+.seg button.on{background:#fff;color:var(--ink)}
+.wrap{padding:14px 20px 60px}
+.kpis{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 14px;min-width:90px}
+.kpi .n{font-size:22px;font-weight:700;color:var(--ink)} .kpi .l{font-size:11px;color:var(--muted)}
+.controls{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.controls input,.controls select{padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff;color:var(--text)}
+.controls input[type=search]{min-width:210px}
+.btn{padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--text);font-size:13px;cursor:pointer}
+.btn:hover{border-color:var(--ink2);color:var(--ink2)}
+.btn.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.primary:hover{background:var(--ink2);color:#fff}
+.chk{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer}
+.spacer{flex:1}
+
+
+ 
+
+.board{display:flex;gap:13px;overflow-x:auto;padding-bottom:8px;align-items:flex-start}
+.col{background:#eef1f2;border-radius:12px;padding:10px;min-width:236px;max-width:260px;flex:0 0 auto;max-height:74vh;overflow-y:auto;transition:background .12s}
+.col.over{background:#d7e6ec;outline:2px dashed var(--ink2)}
+.col h2{margin:-10px -10px 10px;padding:10px 10px 8px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#54636b;display:flex;justify-content:space-between;align-items:center;position:sticky;top:-10px;z-index:5;background:inherit;border-radius:12px 12px 0 0;box-shadow:0 4px 6px -4px rgba(20,30,35,.15)}
+.col h2 .ct{background:#dde4e6;border-radius:10px;padding:0 7px;font-size:11px}
+.cardx{background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:9px;overflow:hidden;cursor:grab}
+.cardx[open]{cursor:default}
+.cardx>summary{list-style:none;padding:10px 11px}
+.cardx>summary::-webkit-details-marker{display:none}
+.cardx .co{font-size:13px;font-weight:700;color:var(--ink)}
+.cardx .ro{font-size:12px;color:#4a5a62;margin-top:1px}
+.cardx .meta{font-size:11px;color:var(--muted);margin-top:5px;display:flex;flex-wrap:wrap;gap:4px 10px}
+.cardx .body{padding:0 11px 11px;border-top:1px dashed var(--line);font-size:12px;color:#4a5660}
+.cardx .body p{margin:8px 0}
+.cardx.drag{opacity:.4}
+.due{color:#b4232a;font-weight:700}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700;white-space:nowrap}
+.rowbtns{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+a.btnlink,.minibtn{display:inline-block;font-size:12px;color:var(--ink2);text-decoration:none;border:1px solid var(--line);border-radius:7px;padding:4px 9px;cursor:pointer;background:#fff}
+.minibtn:hover,a.btnlink:hover{border-color:var(--ink2)}
+.docs{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;border-top:1px dashed var(--line);padding-top:8px}
+.minibtn.gen{border-color:#bfe0c8;color:#137a37}
+.minibtn.gen:hover{background:#f1faf3;border-color:#137a37}
+.docrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.docstat{font-size:11px;margin-top:7px;border-top:1px dashed var(--line);padding-top:8px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.docstat.warn{color:#8a6d1f}
+.docstat.ok{border-top:0;padding-top:2px;margin-top:2px;color:#137a37}
+.docnote{font-size:12px;color:var(--muted)}
+.reqchip{font-size:11px;color:#8a6d1f;background:#fff7e6;border:1px solid #f0d9a8;border-radius:7px;padding:4px 9px;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:10px;overflow:hidden}
+th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.03em;cursor:pointer;user-select:none}
+td .notes{max-width:320px;color:#52606a}
+tr.clickable:hover{background:#f7fafb;cursor:pointer}
+.hidden{display:none}
+footer{color:var(--muted);font-size:12px;margin-top:22px;display:flex;gap:14px;flex-wrap:wrap}
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(20,30,35,.45);display:none;align-items:flex-start;justify-content:center;padding:30px 16px;overflow-y:auto;z-index:50}
+.modal.show{display:flex}
+.sheet{background:#fff;border-radius:14px;width:100%;max-width:560px;padding:20px 22px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.sheet h2{margin:0 0 14px;font-size:17px;color:var(--ink)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field.full{grid-column:1 / -1}
+.field label{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+.field input,.field select,.field textarea{padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:var(--text)}
+.field textarea{min-height:80px;resize:vertical}
+.sheet .foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px}
+.danger{color:#b4232a;border-color:#e3b4b7}
+.danger:hover{background:#fdf0f1;border-color:#b4232a;color:#b4232a}
+.filechip{font-size:12px;color:var(--muted);padding:5px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;white-space:nowrap}
+.filechip.ok{color:#137a37;border-color:#bfe0c8;background:#f1faf3}
+.filechip.warn{color:#8a6d1f;border-color:#f0d9a8;background:#fff7e6}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:80;max-width:80vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Job Hunt — Tracker</h1><div class="sub">Local-first · link a data file for durable, portable storage</div></div>
+  <div style="display:flex;gap:10px;align-items:center">
+    <div class="seg"><button id="vb" class="on" onclick="setView('board')">Board</button><button id="vt" onclick="setView('table')">Table</button></div>
+  </div>
+</header>
+<div class="wrap">
+  <div class="kpis" id="kpis"></div>
+  <div class="controls">
+    <input type="search" id="q" placeholder="Search company, role, notes…" oninput="render()">
+    <select id="sf" onchange="render()"><option value="">All statuses</option></select>
+    <label class="chk"><input type="checkbox" id="sc" onchange="render()"> Hide closed &amp; won't-apply</label>
+    <span id="filestat" class="filechip">Browser storage</span>
+    <span class="spacer"></span>
+    <button class="btn" id="btnGen" style="display:none" onclick="genDocs()" title="Opens Claude — press ▶ in the Job Docs artifact to run the generator">⚡ Generate docs</button>
+    <button class="btn primary" onclick="openEdit(null)">+ Add</button>
+    <button class="btn" onclick="exportJSON()">Export</button>
+    <button class="btn" onclick="document.getElementById('imp').click()">Import</button>
+    <button class="btn" onclick="exportCSV()">CSV</button>
+    <button class="btn" id="btnOpen" onclick="linkOpen()" style="display:none">Open file</button>
+    <button class="btn" id="btnSaveAs" onclick="linkNew()" style="display:none">Save As file</button>
+    <button class="btn" id="btnUnlink" onclick="unlinkFile()" style="display:none">Unlink</button>
+    <button class="btn primary" id="btnReconnect" onclick="reconnect()" style="display:none">Reconnect</button>
+    <input type="file" id="imp" accept="application/json" class="hidden" onchange="importJSON(event)">
+  </div>
+  <div id="board" class="board"></div>
+  <div id="table" class="hidden"></div>
+  <footer id="foot"></footer>
+</div>
+
+<div class="modal" id="modal">
+  <div class="sheet">
+    <h2 id="mtitle">Edit application</h2>
+    <div class="grid">
+      <div class="field"><label>Company *</label><input id="f_company"></div>
+      <div class="field"><label>Role / Title</label><input id="f_role"></div>
+      <div class="field"><label>Status</label><select id="f_status"></select></div>
+      <div class="field"><label>Arrangement</label><select id="f_arrangement"><option>Remote</option><option>Hybrid</option><option>Onsite</option><option value=""></option></select></div>
+      <div class="field"><label>Location</label><input id="f_location"></div>
+      <div class="field"><label>Salary range</label><input id="f_salary"></div>
+      <div class="field"><label>Excitement (1–5)</label><select id="f_excitement"><option value=""></option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+      <div class="field"><label>Date applied</label><input id="f_dateApplied" type="date"></div>
+      <div class="field"><label>Next follow-up</label><input id="f_nextFollowup" type="date"></div>
+      <div class="field"><label>Last contact</label><input id="f_lastContact" type="date"></div>
+      <div class="field"><label>Contact / recruiter</label><input id="f_contact"></div>
+      <div class="field"><label>Resume version</label><input id="f_resumeVersion"></div>
+      <div class="field"><label>Cover letter?</label><select id="f_coverLetter"><option value=""></option><option>Yes</option><option>No</option><option>N/A</option></select></div>
+      <div class="field"><label>Source</label><input id="f_source"></div>
+      <div class="field full"><label>Posting URL</label><input id="f_url" placeholder="https://…"></div>
+      <div class="field full"><label>Notes</label><textarea id="f_notes"></textarea></div>
+      <div class="field full"><label>Documents</label>
+        <div class="docrow" id="docctrl"></div>
+        <input id="f_resumeLink" placeholder="Résumé link or file path (optional)">
+        <input id="f_coverLink" placeholder="Cover letter link or file path (optional)" style="margin-top:8px">
+      </div>
+    </div>
+    <div class="foot">
+      <button class="btn danger" id="delbtn" onclick="deleteCurrent()">Delete</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="closeEdit()">Cancel</button>
+        <button class="btn primary" onclick="saveEdit()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SEED = [
+  {
+    "id": "demo-1",
+    "company": "Acme Cloud",
+    "role": "Customer Success Manager",
+    "location": "Remote (US)",
+    "arrangement": "Remote",
+    "url": "https://example.com/jobs/acme-csm",
+    "salary": "$120–150k",
+    "excitement": "4",
+    "status": "To Apply",
+    "dateApplied": "",
+    "nextFollowup": "",
+    "lastContact": "",
+    "contact": "",
+    "source": "Demo data",
+    "resumeVersion": "",
+    "coverLetter": "",
+    "notes": "Demo row — edit or delete me. Add your own with + Add."
+  },
+  {
+    "id": "demo-2",
+    "company": "Northwind Labs",
+    "role": "Senior Support Engineer",
+    "location": "Remote (US)",
+    "arrangement": "Remote",
+    "url": "https://example.com/jobs/northwind-sse",
+    "salary": "$130–160k",
+    "excitement": "5",
+    "status": "Applied",
+    "dateApplied": "2026-06-25",
+    "nextFollowup": "2026-07-06",
+    "lastContact": "2026-06-25",
+    "contact": "recruiting@example.com",
+    "source": "Demo data",
+    "resumeVersion": "v2",
+    "coverLetter": "Yes",
+    "notes": "Demo row — shows how an applied role looks."
+  },
+  {
+    "id": "demo-3",
+    "company": "Globex",
+    "role": "Director of Support",
+    "location": "Hybrid — Denver, CO",
+    "arrangement": "Hybrid",
+    "url": "https://example.com/jobs/globex-dos",
+    "salary": "$160–190k",
+    "excitement": "3",
+    "status": "Screening",
+    "dateApplied": "",
+    "nextFollowup": "",
+    "lastContact": "",
+    "contact": "",
+    "source": "Demo data",
+    "resumeVersion": "",
+    "coverLetter": "",
+    "notes": "Demo row — new finds land in Screening."
+  }
+];
+const KEY = 'jobhunt_v1';
+
+const STAGES=[
+ {key:'Screening',    match:['Screening','Researching'],            primary:'Screening'},
+ {key:'To Apply',     match:['To Apply'],                           primary:'To Apply'},
+ {key:'Applied',      match:['Applied'],                            primary:'Applied'},
+ {key:'Phone Screen', match:['Phone Screen'],                       primary:'Phone Screen'},
+ {key:'Interviewing', match:['Interviewing','Take-home','Final Round'], primary:'Interviewing'},
+ {key:'Offer',        match:['Offer','Accepted'],                   primary:'Offer'},
+ {key:'Closed',       match:['Rejected','Withdrawn','Ghosted'],     primary:'Rejected', hide:true},
+ {key:"Won't Apply",  match:["Won't Apply"],                        primary:"Won't Apply", hide:true},
+];
+const ALL_STATUSES=['Researching','Screening','To Apply','Applied','Phone Screen','Interviewing','Take-home','Final Round','Offer','Accepted','Rejected','Withdrawn','Ghosted',"Won't Apply"];
+const PC={"Researching":"#9aa7ac","Screening":"#6f8b9b","To Apply":"#c79a3a","Applied":"#2c7a93","Phone Screen":"#3a86b0","Interviewing":"#1F4E5F","Take-home":"#5e60ce","Final Round":"#3a0ca3","Offer":"#2a9d4a","Accepted":"#137a37","Rejected":"#b4232a","Withdrawn":"#8d99ae","Ghosted":"#6b7c82","Won't Apply":"#8d99ae"};
+const HIDDEN=['Rejected','Withdrawn','Ghosted',"Won't Apply"];
+const today=new Date().toISOString().slice(0,10);
+
+let state={apps:[]};
+let view='board', sortKey=null, sortDir=1, editingId=null;
+
+function uid(){return 'app-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function load(){
+  let raw=null; try{raw=localStorage.getItem(KEY);}catch(e){}
+  if(raw){try{state.apps=JSON.parse(raw);}catch(e){state.apps=structuredClone(SEED);}}
+  else{state.apps=structuredClone(SEED);}
+  state.apps.forEach(a=>{if(!a.id)a.id=uid();});
+}
+function cacheLocal(){try{localStorage.setItem(KEY,JSON.stringify(state.apps));}catch(e){}}
+function save(){cacheLocal();stamp();if(serverMode){persistServer();}else{persistFile();}}
+function stamp(){const f=document.getElementById('foot');const n=state.apps.length;
+  const where=serverMode?'Saved to data.json':usingFile&&fileHandle?('Saved to '+fileHandle.name):'Saved in this browser';
+  const tip=serverMode?'Local server owns the file · rolling backups in backups/.':usingFile?'Backed by a file on disk.':'Link a file or Export to back up / move devices.';
+  f.innerHTML=`<span>${n} applications</span><span>${where} · ${new Date().toLocaleString()}</span><span>${tip}</span>`;}
+
+/* ---------- Local server sync (server.py) ----------
+   When the app is served by server.py, the server owns data.json:
+   reads on load, atomic writes on every change, rolling backups.
+   Detected via /health; when absent (file://, GitHub Pages) the app
+   falls back to the File System Access API / localStorage below. */
+let serverMode=false, srvWriting=false, srvPending=false;
+async function initServerSync(){
+  try{
+    const h=await fetch('health',{cache:'no-store'});if(!h.ok)return false;
+    const hj=await h.json();if(!hj.ok)return false;
+    const r=await fetch('data.json',{cache:'no-store'});if(!r.ok)return false;
+    const data=await r.json();if(!Array.isArray(data))return false;
+    serverMode=true;state.apps=data;state.apps.forEach(a=>{if(!a.id)a.id=uid();});
+    cacheLocal();return true;
+  }catch(e){return false;}
+}
+async function persistServer(){
+  if(!serverMode)return;
+  if(srvWriting){srvPending=true;return;}
+  srvWriting=true;
+  try{
+    const r=await fetch('save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(state.apps)});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+  }catch(e){
+    toast('⚠ Save to data.json failed — edits are cached in this browser only. Is the tracker server running?');
+  }
+  srvWriting=false;
+  if(srvPending){srvPending=false;persistServer();}
+}
+function openExternal(url){
+  if(serverMode){fetch('open?url='+encodeURIComponent(url)).catch(()=>window.open(url,'_blank'));}
+  else{window.open(url,'_blank');}
+}
+/* In server mode (app-style window) send job links to the default browser. */
+document.addEventListener('click',e=>{
+  if(!serverMode)return;
+  const a=e.target.closest('a[href^="http"]');
+  if(!a)return;
+  e.preventDefault();openExternal(a.href);
+});
+
+/* ---------- File System Access: durable, portable storage ---------- */
+const supportsFS = 'showOpenFilePicker' in window;
+const FT=[{description:'Tracker data (JSON)',accept:{'application/json':['.json']}}];
+let fileHandle=null, usingFile=false, writing=false, pendingWrite=false, toastT=null;
+
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open('jobhunt_fs',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function idbSet(k,v){const db=await idb();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error);});}
+async function idbGet(k){const db=await idb();return new Promise((res,rej)=>{const t=db.transaction('kv','readonly');const q=t.objectStore('kv').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});}
+async function idbDel(k){const db=await idb();return new Promise((res)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').delete(k);t.oncomplete=()=>res();});}
+
+function toast(msg,ms){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);}t.textContent=msg;t.className='show';clearTimeout(toastT);toastT=setTimeout(()=>t.className='',ms||2800);}
+
+async function useHandle(h){fileHandle=h;usingFile=true;try{await idbSet('handle',h);}catch(e){}updateFileStatus();}
+async function loadFromFile(){const f=await fileHandle.getFile();const txt=await f.text();
+  if(txt.trim()){const data=JSON.parse(txt);if(Array.isArray(data)){state.apps=data;state.apps.forEach(a=>{if(!a.id)a.id=uid();});cacheLocal();}}
+  stamp();updateFileStatus();}
+async function writeToFile(){if(!fileHandle)return;const w=await fileHandle.createWritable();await w.write(JSON.stringify(state.apps,null,2));await w.close();stamp();updateFileStatus();}
+async function persistFile(){if(!usingFile||!fileHandle)return;if(writing){pendingWrite=true;return;}writing=true;
+  try{await writeToFile();}catch(e){usingFile=false;updateFileStatus();alert('Lost write access to the data file (permission may have been revoked). Switched to browser storage — use “Open file” to relink.');}
+  writing=false;if(pendingWrite){pendingWrite=false;persistFile();}}
+
+async function linkOpen(){try{const [h]=await window.showOpenFilePicker({types:FT,multiple:false});await useHandle(h);await loadFromFile();render();toast('Linked '+h.name+' — changes now save to this file.');}catch(e){if(e.name!=='AbortError')alert('Could not open file: '+e.message);}}
+async function linkNew(){try{const h=await window.showSaveFilePicker({suggestedName:'job-tracker-data.json',types:FT});await useHandle(h);await writeToFile();render();toast('Created '+h.name+' — changes now save to this file.');}catch(e){if(e.name!=='AbortError')alert('Could not create file: '+e.message);}}
+async function unlinkFile(){const n=fileHandle&&fileHandle.name;usingFile=false;fileHandle=null;try{await idbDel('handle');}catch(e){}updateFileStatus();stamp();toast((n||'File')+' unlinked — now using browser storage.');}
+async function reconnect(){if(!fileHandle)return;let p='denied';try{p=await fileHandle.requestPermission({mode:'readwrite'});}catch(e){}
+  if(p==='granted'){usingFile=true;try{await loadFromFile();render();toast('Reconnected '+fileHandle.name+'.');}catch(e){usingFile=false;}updateFileStatus();}
+  else{alert('Permission denied — staying on browser storage.');}}
+
+function updateFileStatus(mode){
+  const chip=document.getElementById('filestat');if(!chip)return;
+  const bOpen=document.getElementById('btnOpen'),bSave=document.getElementById('btnSaveAs'),bRe=document.getElementById('btnReconnect'),bUn=document.getElementById('btnUnlink');
+  if(serverMode){chip.textContent='🖥 data.json · server-synced';chip.className='filechip ok';
+    bOpen.style.display='none';bSave.style.display='none';bRe.style.display='none';bUn.style.display='none';return;}
+  if(supportsFS){bOpen.style.display='';bSave.style.display='';}
+  bRe.style.display='none';bUn.style.display='none';
+  if(!supportsFS){chip.textContent='Browser storage (this browser only)';chip.className='filechip';return;}
+  if(usingFile&&fileHandle){chip.textContent='📄 '+fileHandle.name+' · file-synced';chip.className='filechip ok';bUn.style.display='';}
+  else if(mode==='needs'&&fileHandle){chip.textContent='📄 '+fileHandle.name+' · needs reconnect';chip.className='filechip warn';bRe.style.display='';bRe.textContent='Reconnect '+fileHandle.name;}
+  else{chip.textContent='Browser storage — not linked';chip.className='filechip';}
+}
+async function initFileSync(){
+  if(!supportsFS){updateFileStatus();return;}
+  let h=null;try{h=await idbGet('handle');}catch(e){}
+  if(!h){updateFileStatus();return;}
+  fileHandle=h;
+  let perm='prompt';try{perm=await h.queryPermission({mode:'readwrite'});}catch(e){}
+  if(perm==='granted'){usingFile=true;try{await loadFromFile();render();}catch(e){usingFile=false;}updateFileStatus();}
+  else{updateFileStatus('needs');}
+}
+
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
+function pill(s){const c=PC[s]||'#9aa7ac';return `<span class="pill" style="background:${c}22;color:${c}">${esc(s)}</span>`;}
+function stageOf(s){for(const st of STAGES){if(st.match.includes(s))return st.key;}return 'Screening';}
+function dueClass(d){return d&&d<=today?'due':'';}
+
+function setView(v){view=v;document.getElementById('vb').classList.toggle('on',v==='board');document.getElementById('vt').classList.toggle('on',v==='table');
+  document.getElementById('board').classList.toggle('hidden',v!=='board');document.getElementById('table').classList.toggle('hidden',v!=='table');render();}
+
+function initFilters(){const sel=document.getElementById('sf');const cur=sel.value;
+  sel.innerHTML='<option value="">All statuses</option>'+ALL_STATUSES.map(s=>`<option ${s===cur?'selected':''}>${s}</option>`).join('');}
+
+function visible(list){const q=document.getElementById('q').value.toLowerCase();const sf=document.getElementById('sf').value;const hide=document.getElementById('sc').checked;
+  return list.filter(a=>{
+    if(hide&&HIDDEN.includes(a.status))return false;
+    if(sf&&a.status!==sf)return false;
+    if(q&&!(`${a.company} ${a.role} ${a.notes}`.toLowerCase().includes(q)))return false;
+    return true;});}
+
+function kpis(list){const c=s=>list.filter(a=>a.status===s).length;
+  const screening=c('Screening')+c('Researching');
+  const toapply=c('To Apply');
+  const applied=['Applied','Phone Screen','Interviewing','Take-home','Final Round','Offer','Accepted'].reduce((n,s)=>n+c(s),0);
+  const inproc=c('Phone Screen')+c('Interviewing')+c('Take-home')+c('Final Round');
+  const offers=c('Offer')+c('Accepted');
+  const due=list.filter(a=>a.nextFollowup&&a.nextFollowup<=today&&!HIDDEN.includes(a.status)&&a.status!=='Accepted').length;
+  const k=[['Tracked',list.length],['Screening',screening],['To apply',toapply],['Applied',applied],['In process',inproc],['Offers',offers],['Follow-ups due',due]];
+  document.getElementById('kpis').innerHTML=k.map(x=>`<div class="kpi"><div class="n">${x[1]}</div><div class="l">${x[0]}</div></div>`).join('');}
+
+
+function card(a){
+  const link=a.url&&a.url.startsWith('http')?`<a class="btnlink" href="${esc(a.url)}" target="_blank" rel="noopener">Open posting ↗</a>`:'';
+  return `<details class="cardx" draggable="true" data-id="${a.id}">
+    <summary>
+      <div class="co">${esc(a.company)}</div>
+      <div class="ro">${esc(a.role)}</div>
+      <div class="meta">${a.salary?`<span>${esc(a.salary)}</span>`:''}${a.arrangement?`<span>${esc(a.arrangement)}</span>`:''}${a.nextFollowup?`<span class="${dueClass(a.nextFollowup)}">⏰ ${esc(a.nextFollowup)}</span>`:''}${a.excitement?`<span>★ ${esc(a.excitement)}</span>`:''}${docBadge(a)}</div>
+    </summary>
+    <div class="body">
+      <p>${pill(a.status)}${a.dateApplied?` · applied ${esc(a.dateApplied)}`:''}${a.source?` · ${esc(a.source)}`:''}</p>
+      ${a.notes?`<p>${esc(cleanNotes(a.notes))}</p>`:''}
+      <div class="rowbtns">${link}<span class="minibtn" onclick="openEdit('${a.id}')">Edit</span></div>
+      ${docsSection(a)}
+    </div>
+  </details>`;}
+
+function renderBoard(list){const hide=document.getElementById('sc').checked;
+  const stages=STAGES.filter(s=>!(s.hide&&hide));
+  document.getElementById('board').innerHTML=stages.map(s=>{
+    const items=list.filter(a=>stageOf(a.status)===s.key);
+    return `<div class="col" data-col="${esc(s.key)}"><h2>${esc(s.key)}<span class="ct">${items.length}</span></h2>${items.map(card).join('')||'<div style="font-size:12px;color:#9aa7ac;padding:4px">drop here</div>'}</div>`;
+  }).join('');
+  wireDnD();}
+
+function wireDnD(){
+  document.querySelectorAll('.cardx').forEach(el=>{
+    el.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',el.dataset.id);el.classList.add('drag');});
+    el.addEventListener('dragend',()=>el.classList.remove('drag'));
+  });
+  document.querySelectorAll('.col').forEach(col=>{
+    col.addEventListener('dragover',e=>{e.preventDefault();col.classList.add('over');});
+    col.addEventListener('dragleave',()=>col.classList.remove('over'));
+    col.addEventListener('drop',e=>{e.preventDefault();col.classList.remove('over');
+      const id=e.dataTransfer.getData('text/plain');const st=STAGES.find(x=>x.key===col.dataset.col);
+      const a=state.apps.find(x=>x.id===id);
+      if(a&&st&&stageOf(a.status)!==st.key){a.status=st.primary;save();render();}
+    });
+  });}
+
+function renderTable(list){
+  let items=visible(list);
+  if(sortKey){items=items.slice().sort((a,b)=>(((a[sortKey]||'')+'').toLowerCase()<((b[sortKey]||'')+'').toLowerCase()?-1:1)*sortDir);}
+  const cols=[['company','Company'],['role','Role'],['status','Status'],['arrangement','Setup'],['salary','Salary'],['excitement','★'],['nextFollowup','Follow-up'],['dateApplied','Applied'],['source','Source']];
+  let h='<table><thead><tr>'+cols.map(c=>`<th onclick="sortBy('${c[0]}')">${c[1]}${sortKey===c[0]?(sortDir>0?' ▲':' ▼'):''}</th>`).join('')+'<th>Notes</th></tr></thead><tbody>';
+  items.forEach(a=>{
+    h+=`<tr class="clickable" onclick="openEdit('${a.id}')">`+
+       `<td><strong>${esc(a.company)}</strong></td><td>${esc(a.role)}</td><td>${pill(a.status)}</td>`+
+       `<td>${esc(a.arrangement)}</td><td>${esc(a.salary)}</td><td>${esc(a.excitement)}</td>`+
+       `<td class="${dueClass(a.nextFollowup)}">${esc(a.nextFollowup)}</td><td>${esc(a.dateApplied)}</td><td>${esc(a.source)}</td>`+
+       `<td class="notes">${esc((a.notes||'').slice(0,140))}</td></tr>`;
+  });
+  h+='</tbody></table>';
+  document.getElementById('table').innerHTML=h;}
+
+function sortBy(k){if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1;}render();}
+
+function render(){
+  const list=visible(state.apps);
+  kpis(state.apps);
+  updateGenBtn();
+  if(view==='board')renderBoard(list); else renderTable(state.apps);
+}
+function queuedDocs(){return state.apps.filter(a=>a.status==='To Apply'&&!hasDocs(a)&&!docMarkers(a).skip);}
+function updateGenBtn(){const b=document.getElementById('btnGen');if(!b)return;
+  const n=queuedDocs().length;
+  b.style.display=(serverMode&&n>0)?'':'none';
+  b.textContent='⚡ Generate docs ('+n+')';}
+function genDocs(){
+  fetch('claude').then(r=>r.json())
+    .then(j=>{toast(j.ok?'Claude is in front → open “Job Docs — Generate Now” in the Artifacts panel and press ▶':'⚠ '+(j.error||'Could not open Claude'),9000);})
+    .catch(()=>toast('⚠ Could not reach the tracker server.',5000));}
+
+/* ---------- documents (written by Claude, surfaced here) ---------- */
+/* The app does not generate anything. The hourly generator (Claude) writes
+   drafts into this app's data (resumeMD/coverMD) plus .docx files in
+   Resume/Tailored + Cover Letters/Tailored, and stamps the outcome into
+   notes as [docs: generated …] or [docs: skipped … — reason]. The cards
+   surface that state below. */
+function hasDocs(a){return !!(a.resumeMD||a.coverMD||a.resumeLink||a.coverLink);}
+function docMarkers(a){const n=a.notes||'';
+  return {gen:/\[docs: generated (\d{4}-\d{2}-\d{2})/.exec(n),
+          skip:/\[docs: skipped (\d{4}-\d{2}-\d{2})\s*[—–-]+\s*([^\]]*)\]/.exec(n)};}
+function cleanNotes(n){return (n||'').replace(/\s*\[docs:[^\]]*\]/g,'').trim();}
+function docBadge(a){
+  if(hasDocs(a))return '<span style="color:#137a37" title="Drafts ready — review before sending">📄 ✓</span>';
+  const m=docMarkers(a);
+  if(m.skip)return '<span style="color:#8a6d1f" title="Doc generation skipped — expand card for the reason">📄 ⚠</span>';
+  if(a.status==='To Apply')return '<span title="Docs queued — press Generate in Cowork (or ask Claude)">📄 ⏳</span>';
+  return '';}
+function docsSection(a){
+  const m=docMarkers(a);
+  if(hasDocs(a)){
+    const note=m.gen?`<div class="docstat ok">✓ Drafts generated ${esc(m.gen[1])} — review before sending</div>`:'';
+    return `<div class="docs">${docLinks(a)}</div>${note}`;}
+  if(m.skip)return `<div class="docstat warn">⚠ Docs skipped ${esc(m.skip[1])} — ${esc(m.skip[2]||'see notes')}<span class="minibtn" onclick="retryDocs('${a.id}')">Retry</span></div>`;
+  if(a.status==='To Apply')return `<div class="docstat">⏳ Docs queued — press “Generate” in Cowork (or ask Claude in chat)</div>`;
+  return '';}
+function retryDocs(id){const a=state.apps.find(x=>x.id===id);if(!a)return;
+  a.notes=cleanNotes(a.notes);
+  save();render();toast('Retry queued — press Generate in Cowork to regenerate docs for '+a.company+'.');}
+function docLinks(a){return docLink(a,'resume')+docLink(a,'cover');}
+function docLink(a,which){
+  const ext=which==='resume'?a.resumeLink:a.coverLink;
+  const md=which==='resume'?a.resumeMD:a.coverMD;
+  const label=which==='resume'?'📄 Résumé':'✉ Cover letter';
+  if(md){let h=`<span class="minibtn" onclick="openDoc('${a.id}','${which}')" title="View Claude-written draft">${label}</span>`;
+    if(serverMode)h+=`<span class="minibtn" onclick="revealDoc('${a.id}','${which}')" title="Show the .docx in your file manager — drag it straight into the application">📂</span>`;
+    else h+=`<span class="minibtn" onclick="downloadDoc('${a.id}','${which}')" title="Download .md">⬇</span>`;
+    return h;}
+  if(ext)return `<a class="btnlink" href="${esc(ext)}" target="_blank" rel="noopener">${label} ↗</a>`;
+  return '';
+}
+function revealDoc(id,which){const a=state.apps.find(x=>x.id===id);if(!a)return;
+  const kind=which==='resume'?'Resume':'Cover Letter';
+  const folder=which==='resume'?'Resume/Tailored':'Cover Letters/Tailored';
+  const name=((a.company||'')+' - '+(a.role||'')+' - '+kind+'.docx').replace(/[\/:]/g,'');
+  fetch('reveal?path='+encodeURIComponent(folder+'/'+name))
+    .then(r=>r.json())
+    .then(j=>{if(!j.ok)toast('⚠ '+(j.error||'Could not reveal file'));else if(j.note)toast(j.note);})
+    .catch(()=>toast('⚠ Could not reach the tracker server.'));
+}
+function mdToHtml(md){
+  const lines=(md||'').split('\n');let html='',inUl=false;
+  const inline=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  const closeUl=()=>{if(inUl){html+='</ul>';inUl=false;}};
+  for(const raw of lines){const l=raw.trim();
+    if(!l){closeUl();continue;}
+    if(l.startsWith('### ')){closeUl();html+='<h3>'+inline(l.slice(4))+'</h3>';}
+    else if(l.startsWith('## ')){closeUl();html+='<h2>'+inline(l.slice(3))+'</h2>';}
+    else if(l.startsWith('# ')){closeUl();html+='<h1>'+inline(l.slice(2))+'</h1>';}
+    else if(l.startsWith('> ')){closeUl();html+='<p class="muted">'+inline(l.slice(2))+'</p>';}
+    else if(l.startsWith('- ')){if(!inUl){html+='<ul>';inUl=true;}html+='<li>'+inline(l.slice(2))+'</li>';}
+    else{closeUl();html+='<p>'+inline(l)+'</p>';}}
+  closeUl();return html;
+}
+function openDoc(id,which){const a=state.apps.find(x=>x.id===id);if(!a)return;
+  const md=which==='resume'?a.resumeMD:a.coverMD;
+  const ext=which==='resume'?a.resumeLink:a.coverLink;
+  if(!md){if(ext){openExternal(ext);return;}alert('No '+which+' yet — flag it and ask Claude to generate.');return;}
+  const title=(which==='resume'?'Résumé':'Cover letter')+' — '+a.company;
+  const w=window.open('','_blank');if(!w){alert('Pop-up blocked — allow pop-ups to view documents.');return;}
+  w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+esc(title)+'</title>'+
+   '<style>body{font-family:Georgia,"Times New Roman",serif;max-width:740px;margin:40px auto;padding:0 24px;color:#222;line-height:1.5}'+
+   'h1{font-size:24px;margin:0 0 2px}h2{font-size:15px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #ccc;padding-bottom:3px;margin:20px 0 8px;color:#1F4E5F}'+
+   'h3{font-size:14px;margin:12px 0 2px}ul{margin:4px 0 10px;padding-left:20px}li{margin:3px 0}p{margin:6px 0}.muted{color:#777;font-style:italic}'+
+   '.bar{position:fixed;top:0;left:0;right:0;background:#1F4E5F;color:#fff;padding:8px 16px;font-family:system-ui,sans-serif;font-size:13px;display:flex;gap:12px;align-items:center}'+
+   '.bar button{background:#fff;color:#1F4E5F;border:0;border-radius:6px;padding:5px 12px;cursor:pointer}@media print{.bar{display:none}body{margin:0}}</style></head>'+
+   '<body><div class="bar">Claude-written draft — review before sending. <button onclick="window.print()">Print / Save as PDF</button></div>'+
+   '<div style="height:34px"></div>'+mdToHtml(md)+'</body></html>');
+  w.document.close();
+}
+function downloadDoc(id,which){const a=state.apps.find(x=>x.id===id);if(!a)return;
+  const md=which==='resume'?a.resumeMD:a.coverMD;if(!md){alert('Nothing to download yet.');return;}
+  const safe=(a.company+' - '+(which==='resume'?'Resume':'Cover Letter')).replace(/[^\w .-]/g,'');
+  download(safe+'.md',md,'text/markdown');}
+function renderDocCtrl(){
+  const el=document.getElementById('docctrl');if(!el)return;
+  const a=editingId?(state.apps.find(x=>x.id===editingId)||{}):{};
+  let h='';
+  if(a.resumeMD||a.resumeLink)h+='<a class="btnlink" onclick="openDoc(\''+editingId+'\',\'resume\')">📄 View résumé</a>';
+  if(a.coverMD||a.coverLink)h+='<a class="btnlink" onclick="openDoc(\''+editingId+'\',\'cover\')">✉ View cover letter</a>';
+  if(!h)h='<span class="docnote">No documents yet — ask Claude in chat to generate them for this role.</span>';
+  el.innerHTML=h;
+}
+
+/* ---------- edit modal ---------- */
+function fillStatusSelect(){document.getElementById('f_status').innerHTML=ALL_STATUSES.map(s=>`<option>${s}</option>`).join('');}
+function openEdit(id){
+  editingId=id;
+  const a=id?state.apps.find(x=>x.id===id):{};
+  document.getElementById('mtitle').textContent=id?'Edit application':'Add application';
+  document.getElementById('delbtn').style.display=id?'inline-block':'none';
+  const g=k=>document.getElementById('f_'+k);
+  ['company','role','location','salary','dateApplied','nextFollowup','lastContact','contact','resumeVersion','source','url','notes','resumeLink','coverLink'].forEach(k=>g(k).value=a[k]||'');
+  g('status').value=a.status||'Screening';
+  g('arrangement').value=a.arrangement||'Remote';
+  g('excitement').value=a.excitement||'';
+  g('coverLetter').value=a.coverLetter||'';
+  document.getElementById('modal').classList.add('show');
+  renderDocCtrl();
+}
+function closeEdit(){document.getElementById('modal').classList.remove('show');editingId=null;}
+function persistForm(){
+  const g=k=>document.getElementById('f_'+k).value.trim();
+  const company=g('company');
+  if(!company){alert('Company is required.');return null;}
+  const data={company,role:g('role'),status:g('status'),arrangement:g('arrangement'),location:g('location'),
+    salary:g('salary'),excitement:g('excitement'),dateApplied:g('dateApplied'),nextFollowup:g('nextFollowup'),
+    lastContact:g('lastContact'),contact:g('contact'),resumeVersion:g('resumeVersion'),coverLetter:g('coverLetter'),
+    source:g('source'),url:g('url'),notes:g('notes'),resumeLink:g('resumeLink'),coverLink:g('coverLink')};
+  if(editingId){Object.assign(state.apps.find(x=>x.id===editingId),data);}
+  else{data.id=uid();state.apps.unshift(data);editingId=data.id;}
+  save();return editingId;
+}
+function saveEdit(){if(persistForm()){closeEdit();render();}}
+function deleteCurrent(){if(!editingId)return;const a=state.apps.find(x=>x.id===editingId);
+  if(confirm(`Delete ${a.company} — ${a.role||''}? This can't be undone.`)){state.apps=state.apps.filter(x=>x.id!==editingId);save();closeEdit();render();}}
+
+/* ---------- import / export ---------- */
+function download(name,text,type){const b=new Blob([text],{type});const u=URL.createObjectURL(b);const x=document.createElement('a');x.href=u;x.download=name;x.click();URL.revokeObjectURL(u);}
+function exportJSON(){download('job-tracker-data.json',JSON.stringify(state.apps,null,2),'application/json');}
+function exportCSV(){
+  const cols=['company','role','status','arrangement','location','salary','excitement','dateApplied','nextFollowup','lastContact','contact','resumeVersion','coverLetter','source','url','notes'];
+  const q=s=>'"'+((s||'')+'').replace(/"/g,'""')+'"';
+  const rows=[cols.join(',')].concat(state.apps.map(a=>cols.map(c=>q(a[c])).join(',')));
+  download('job-tracker.csv',rows.join('\n'),'text/csv');
+}
+function importJSON(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const data=JSON.parse(r.result);if(!Array.isArray(data))throw 0;
+    if(confirm(`Import ${data.length} applications? This replaces your current ${state.apps.length}. (Export first if unsure.)`)){
+      state.apps=data;state.apps.forEach(a=>{if(!a.id)a.id=uid();});save();render();}
+  }catch(e){alert('That file is not valid tracker JSON.');}ev.target.value='';};
+  r.readAsText(f);}
+
+/* ---------- boot ---------- */
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeEdit();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeEdit();});
+fillStatusSelect();
+load();
+initFilters();
+stamp();
+render();
+initServerSync().then(ok=>{
+  if(ok){initFilters();stamp();render();updateFileStatus();}
+  else{initFileSync();}
+});
+</script>
+</body>
+</html>

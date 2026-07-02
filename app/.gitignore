@@ -1,0 +1,4 @@
+backups/
+server.log
+.DS_Store
+*.bak
