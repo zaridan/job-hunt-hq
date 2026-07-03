@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.7 — 2026-07-02
+- Anti-slop hardening for generated documents (includes the previously
+  unreleased JD-echo pass plus a portfolio-level pass):
+  - generate-docs: no lifted posting language; every claim traces to the
+    master resume; numbers verbatim or not at all; banned stock openers/
+    closers ("I'm writing to apply...", "I'd welcome the chance to
+    discuss..."); a stock-phrase avoid-list; em-dash and rhythm checks; and
+    a cross-letter check — each new letter is compared against the 2–3 most
+    recent so openers, closers, and anecdote phrasing never repeat.
+  - Cover-Letter-Template asset: boilerplate opener/closer removed from the
+    template body; cross-letter comparison added to the send checklist.
+
 ## 0.1.6 — 2026-07-02
 - Docs: first-run folder-access note — Claude asks permission to open your
   job-hunt folder during setup and again on new sessions, or the first time an

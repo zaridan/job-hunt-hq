@@ -14,6 +14,9 @@ For each To Apply card without documents: fetch the real posting, tailor from th
 - NEVER lift language from the posting. Do not copy the posting's phrases, adjectives, or sentence stems into the resume or cover letter. The posting tells you what to *select and foreground* from real experience — it is not source text to echo. A hiring committee ranks down any document that reads like the job description handed back to them.
 - Every claim must trace to a specific, real thing in the master resume — a named project, team, system, or outcome. If a requirement in the posting has no genuine match in the user's experience, leave it unaddressed rather than papering over it with generic phrasing.
 - Numbers come from the master resume verbatim or not at all. Never invent, round up, or generate a plausible-looking metric, and never reuse the same stat as a near-duplicate across different bullets (the "increased efficiency by 20% / 23% / 18%" tell).
+- NEVER open a cover letter with "I'm writing to apply for..." or close with "I'd welcome the chance/opportunity to discuss... Thank you for your consideration." — these are the most recognizable template stems in existence. Name the role naturally inside the first paragraph; end with a specific, plain-spoken close.
+- Avoid the stock-phrase register recruiters flag as AI-written: "resonates with me", "aligns with my", "I'm excited to", "passionate about", "proven track record", "leveraged", "exactly the kind of", "I am confident that". Plain verbs and concrete nouns instead.
+- Watch the punctuation rhythm: at most one em-dash per paragraph in the cover letter, and don't let every resume bullet follow the same verb—clause—outcome shape. Vary sentence length; a short sentence is fine.
 
 ## Step 1 — Select cards
 Entries where status == "To Apply", all of resumeMD / coverMD / resumeLink / coverLink are empty/absent, and notes does not contain "[docs:" (a prior failure/skip marker — the user deletes the marker to request a retry). If none: report that in one line and stop. Process at most 4 per run, oldest first.
@@ -38,7 +41,8 @@ Read each draft back and verify all of the following. If any fails, revise befor
 - **No echo:** no phrase or sentence stem is lifted from the posting; the cover letter is not the job description rephrased.
 - **No template smell:** bullets don't share a repeated stem with only the noun/number swapped; the cover letter opening is not reusable across companies.
 - **Traceable:** every skill, title, date, and metric maps to something real in the master resume.
-- **Sounds human:** read it aloud in your head — if it sounds like LinkedIn boilerplate rather than a person describing their own work, fix it.
+- **Not a sibling:** open the 2–3 most recently generated cover letters in `Cover Letters/Tailored/` (including `Applied/`) and compare. No shared opening sentence, closing sentence, or near-verbatim anecdote phrasing. The same true story may appear in two letters, but told differently and only where it is the strongest match — rotate which achievements lead when the posting allows. A recruiter who sees two of these letters should not be able to tell they came from the same template.
+- **Sounds human:** read it aloud in your head — if it sounds like LinkedIn boilerplate rather than a person describing their own work, fix it. Check the tics: stock openers/closers, em-dash pileups, "not just X but Y" constructions, rule-of-three lists in every paragraph.
 If a card can only be filled with generic material because the genuine match is weak, prefer a shorter, rougher, honest document over a polished generic one — and note the weak fit in the report rather than hiding it.
 
 ## Step 5 — Write the files

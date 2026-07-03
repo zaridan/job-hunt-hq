@@ -24,11 +24,12 @@
 
 Dear [Hiring Manager Name / "Hiring Team"],
 
-**Opening — hook + why this company.** I'm writing to apply for the [Role
-Title] position at [Company]. [One or two sentences on what specifically
-draws you to this company — a product, mission, market, or recent move you
-genuinely admire, stated concretely enough that it couldn't be pasted into a
-letter to any other employer. Tie it to your experience.]
+**Opening — hook + why this company.** [Do NOT open with "I'm writing to
+apply for..." — it's the most recognizable template stem there is. Lead with
+the hook itself: something specific and true about this company's product,
+market, or problem that connects to your experience, and name the role
+naturally within the first paragraph. Two openers from your last few letters
+should never start the same way.]
 
 **Middle — proof.** [Your two or three most relevant accomplishments. Pick
 them by looking at what this role actually needs, then tell each as a real
@@ -39,7 +40,9 @@ beats "leveraged cross-functional collaboration"). Real numbers beat
 adjectives; don't manufacture one to fill the slot.]
 
 **Close — fit + ask.** [One sentence on why the fit works both ways, one
-sentence inviting the conversation.]
+sentence inviting the conversation — in plain words, not "I'd welcome the
+chance to discuss... Thank you for your consideration." Vary your close
+letter to letter.]
 
 Sincerely,
 [Your Name]
@@ -48,4 +51,6 @@ Sincerely,
 
 > Before you send: read it aloud. If it sounds like a person describing their
 > own work, good. If it sounds like LinkedIn boilerplate — or like the job
-> description handed back — rewrite the part that does.
+> description handed back — rewrite the part that does. Then put it next to
+> your last two letters: shared openers, closers, or identically worded
+> anecdotes mean it's a template with the company name swapped. Fix that too.
