@@ -8,7 +8,10 @@
 > that read like the JD rephrased. Use the posting to decide *which of your
 > real experiences to lead with*, then describe those in your own plain words.
 > Every claim should trace to something you actually did; keep a number only
-> if it's real.
+> if it's real. Skip the AI-flagged register entirely: "I am writing to
+> express my interest", "proven track record", "resonates with me", "delve",
+> "testament", "synergy", and compliments to an "innovative culture" that
+> name no actual product or decision.
 
 ---
 

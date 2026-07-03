@@ -61,7 +61,15 @@ Sanity-check answers as they come in: an implausible value (a "$10K" comp floor,
 
 ## Step 4 — Build the Master Resume
 
-If the user has a resume (any format), convert it into `Resume/Master-Resume.md` — complete history, everything included (tailored copies trim from it). If they don't, interview them role-by-role. Copy `assets/Cover-Letter-Template.md` and `assets/Company-Research-Template.md` into their folders, filling in the user's name and contact details. Write `START-HERE.md` from `assets/START-HERE-Template.md`, adapted to their setup.
+If the user has a resume (any format), convert it into `Resume/Master-Resume.md` — complete history, everything included (tailored copies trim from it). If they don't, interview them role-by-role.
+
+The master resume is the source of truth every tailored document inherits from, so build it to survive all three screening layers:
+- **Everything in the user's own words.** Capture stories and outcomes as the user tells them; don't "improve" their phrasing into LinkedIn-speak. Never add a skill, metric, or accomplishment the user didn't state — ask for the real number and record it verbatim (or leave it out; never estimate one for them).
+- **Canonical terms for hard skills.** Record tools, platforms, and certifications under their exact standard names (e.g. "Zendesk", "Salesforce", "SQL") so tailored resumes can match ATS keywords honestly. Spell out acronyms once.
+- **Standard structure:** Summary, Skills/Core Competencies, Professional Experience (reverse-chronological, "Month YYYY – Month YYYY" dates), Education. Contact info at the top of the body.
+- **Interview-survivable only:** if the user hesitates to claim something, note it as adjacent experience rather than ownership — the thesis's reality check depends on this distinction.
+
+Copy `assets/Cover-Letter-Template.md` and `assets/Company-Research-Template.md` into their folders, filling in the user's name and contact details. Write `START-HERE.md` from `assets/START-HERE-Template.md`, adapted to their setup.
 
 ## Step 5 — Offer the automations (optional, each independently)
 

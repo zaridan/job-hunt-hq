@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.1.8 — 2026-07-02
+- Screening-robustness pass across all three review layers:
+  - ATS: explicit .docx formatting rules (single column, no tables/text
+    boxes/graphics, contact info in body not header/footer, standard section
+    headings, plain bullets, "Month YYYY" dates, standard fonts); canonical
+    hard-skill terms with a keyword-coverage check (exact true terms present
+    once, no stuffing); acronyms spelled out once.
+  - LLM screening: resume/cover-letter cross-consistency check (same titles,
+    dates, numbers, voice); explicit ban on hidden text, white-on-white
+    keywords, and instructions addressed to AI screeners.
+  - Human screening: expanded AI-register avoid-list ("delve", "testament",
+    "synergy", "I am writing to express my interest", no-substance flattery);
+    no mid-sentence bolding; sentence-rhythm variation; every claim must be
+    interview-survivable (two minutes of unprompted detail).
+  - setup-job-tracker: master-resume build rules — user's own words, verbatim
+    numbers or none, canonical skill names, standard structure, adjacent vs.
+    owned experience distinction.
+  - Report step: remind users to rename uploads to "<First-Last> - Resume"
+    (candidate name, not company, in the filename).
+
 ## 0.1.7 — 2026-07-02
 - Anti-slop hardening for generated documents (includes the previously
   unreleased JD-echo pass plus a portfolio-level pass):
