@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Local-first job-hunt system for Claude: kanban tracker in a folder you own, plus skills that find, fit-score, and tailor. Never auto-applies.",
-    "version": "0.1.9"
+    "version": "0.1.10"
   },
   "plugins": [
     {

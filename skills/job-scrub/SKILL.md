@@ -37,11 +37,11 @@ Read, parse, append, write valid JSON preserving all existing entries. New entry
 ```json
 { "id": "app-XXX (continue after current highest)", "company": "", "role": "",
   "location": "", "arrangement": "Remote|Hybrid|Onsite", "url": "<apply link>",
-  "dateApplied": "", "status": "Screening", "resumeVersion": "", "coverLetter": "",
+  "dateAdded": "<today YYYY-MM-DD>", "dateApplied": "", "status": "Screening", "resumeVersion": "", "coverLetter": "",
   "contact": "", "lastContact": "", "nextFollowup": "", "salary": "",
   "excitement": "", "fitScore": "<0-100>", "notes": "<tier + fit why + verify flags>", "source": "<board>" }
 ```
-Status exactly `"Screening"`. VALIDATE after writing: JSON parses, length grew by exactly the appended count, no pre-existing entry changed. Then best-effort: `git -C "<root>/Job Tracker App" add data.json && git commit -m "job-scrub: add N roles"`.
+Status exactly `"Screening"`. Set `dateAdded` to today's date (the scrub run date) so the card shows when it landed in Screening. VALIDATE after writing: JSON parses, length grew by exactly the appended count, no pre-existing entry changed. Then best-effort: `git -C "<root>/Job Tracker App" add data.json && git commit -m "job-scrub: add N roles"`.
 
 ## Step 6 — Report
 How many new roles, the Tier A standouts, link to the review file. New roles appear in the app's Screening column on next load.

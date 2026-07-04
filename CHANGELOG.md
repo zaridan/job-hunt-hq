@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.10 — 2026-07-04
+- Tracker cards now show an "added" date (＋ date, with a relative-age
+  tooltip) so you can see at a glance when a role landed in Screening.
+  Manually added cards are stamped on creation.
+- job-scrub: new Screening roles are stamped with `dateAdded` (the scrub run
+  date) so auto-found roles carry the date too.
+- Removed the "⚡ Generate docs" button from the tracker toolbar (docs are
+  generated on demand from chat / the Cowork artifact; the toolbar button
+  was redundant noise).
+
 ## 0.1.9 — 2026-07-04
 - Tracker board: narrower-screen ergonomics for the kanban board.
   - Collapsible columns: each column header has a chevron that collapses it

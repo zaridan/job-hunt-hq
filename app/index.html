@@ -63,6 +63,7 @@ header .sub{opacity:.85;font-size:12px}
 .cardx .co{font-size:13px;font-weight:700;color:var(--ink)}
 .cardx .ro{font-size:12px;color:#4a5a62;margin-top:1px}
 .cardx .meta{font-size:11px;color:var(--muted);margin-top:5px;display:flex;flex-wrap:wrap;gap:4px 10px}
+.cardx .meta .added{color:#5f7a86;font-weight:600}
 .cardx .body{padding:0 11px 11px;border-top:1px dashed var(--line);font-size:12px;color:#4a5660}
 .cardx .body p{margin:8px 0}
 .cardx.drag{opacity:.4}
@@ -125,7 +126,6 @@ footer{color:var(--muted);font-size:12px;margin-top:22px;display:flex;gap:14px;f
     <span class="colwrap" id="colwrap"><button class="btn" id="btnCols" type="button">Columns ▾</button><div class="colmenu" id="colmenu"></div></span>
     <span id="filestat" class="filechip">Browser storage</span>
     <span class="spacer"></span>
-    <button class="btn" id="btnGen" style="display:none" onclick="genDocs()" title="Opens Claude — press ▶ in the Job Docs artifact to run the generator">⚡ Generate docs</button>
     <button class="btn primary" onclick="openEdit(null)">+ Add</button>
     <button class="btn" onclick="exportJSON()">Export</button>
     <button class="btn" onclick="document.getElementById('imp').click()">Import</button>
@@ -414,13 +414,15 @@ function kpis(list){const c=s=>list.filter(a=>a.status===s).length;
 
 
 function fitCls(v){const n=parseInt(v)||0;return n>=85?'fit-hi':n>=70?'fit-mid':'fit-lo';}
+function ageStr(d){if(!d)return '';const n=Math.round((Date.parse(today)-Date.parse(d))/86400000);
+  if(isNaN(n))return '';if(n<=0)return 'today';if(n===1)return 'yesterday';if(n<7)return n+' days ago';if(n<30)return Math.floor(n/7)+'w ago';if(n<365)return Math.floor(n/30)+'mo ago';return Math.floor(n/365)+'y ago';}
 function card(a){
   const link=a.url&&a.url.startsWith('http')?`<a class="btnlink" href="${esc(a.url)}" target="_blank" rel="noopener">Open posting ↗</a>`:'';
   return `<details class="cardx" draggable="true" data-id="${a.id}">
     <summary>
       <div class="co">${esc(a.company)}</div>
       <div class="ro">${esc(a.role)}</div>
-      <div class="meta">${a.salary?`<span>${esc(a.salary)}</span>`:''}${a.arrangement?`<span>${esc(a.arrangement)}</span>`:''}${a.nextFollowup?`<span class="${dueClass(a.nextFollowup)}">⏰ ${esc(a.nextFollowup)}</span>`:''}${a.fitScore?`<span class="fitb ${fitCls(a.fitScore)}">◎ ${esc(a.fitScore)}</span>`:''}${a.excitement?`<span>★ ${esc(a.excitement)}</span>`:''}${docBadge(a)}</div>
+      <div class="meta">${a.dateAdded?`<span class="added" title="Added ${esc(ageStr(a.dateAdded))}">＋ ${esc(a.dateAdded)}</span>`:''}${a.salary?`<span>${esc(a.salary)}</span>`:''}${a.arrangement?`<span>${esc(a.arrangement)}</span>`:''}${a.nextFollowup?`<span class="${dueClass(a.nextFollowup)}">⏰ ${esc(a.nextFollowup)}</span>`:''}${a.fitScore?`<span class="fitb ${fitCls(a.fitScore)}">◎ ${esc(a.fitScore)}</span>`:''}${a.excitement?`<span>★ ${esc(a.excitement)}</span>`:''}${docBadge(a)}</div>
     </summary>
     <div class="body">
       <p>${pill(a.status)}${a.dateApplied?` · applied ${esc(a.dateApplied)}`:''}${a.source?` · ${esc(a.source)}`:''}</p>
@@ -479,18 +481,8 @@ function sortBy(k){if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1;}render()
 function render(){
   const list=visible(state.apps);
   kpis(state.apps);
-  updateGenBtn();
   if(view==='board')renderBoard(list); else renderTable(state.apps);
 }
-function queuedDocs(){return state.apps.filter(a=>a.status==='To Apply'&&!hasDocs(a)&&!docMarkers(a).skip);}
-function updateGenBtn(){const b=document.getElementById('btnGen');if(!b)return;
-  const n=queuedDocs().length;
-  b.style.display=(serverMode&&n>0)?'':'none';
-  b.textContent='⚡ Generate docs ('+n+')';}
-function genDocs(){
-  fetch('claude').then(r=>r.json())
-    .then(j=>{toast(j.ok?'Claude is in front → open “Job Docs — Generate Now” in the Artifacts panel and press ▶':'⚠ '+(j.error||'Could not open Claude'),9000);})
-    .catch(()=>toast('⚠ Could not reach the tracker server.',5000));}
 
 /* ---------- documents (written by Claude, surfaced here) ---------- */
 /* The app does not generate anything. The hourly generator (Claude) writes
@@ -611,7 +603,7 @@ function persistForm(){
     lastContact:g('lastContact'),contact:g('contact'),resumeVersion:g('resumeVersion'),coverLetter:g('coverLetter'),
     source:g('source'),url:g('url'),notes:g('notes'),resumeLink:g('resumeLink'),coverLink:g('coverLink')};
   if(editingId){Object.assign(state.apps.find(x=>x.id===editingId),data);}
-  else{data.id=uid();state.apps.unshift(data);editingId=data.id;}
+  else{data.id=uid();data.dateAdded=today;state.apps.unshift(data);editingId=data.id;}
   save();return editingId;
 }
 function saveEdit(){if(persistForm()){closeEdit();render();}}
