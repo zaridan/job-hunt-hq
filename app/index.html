@@ -253,6 +253,11 @@ const ALL_STATUSES=['Researching','Screening','To Apply','Applied','Phone Screen
 const PC={"Researching":"#9aa7ac","Screening":"#6f8b9b","To Apply":"#c79a3a","Applied":"#2c7a93","Phone Screen":"#3a86b0","Interviewing":"#1F4E5F","Take-home":"#5e60ce","Final Round":"#3a0ca3","Offer":"#2a9d4a","Accepted":"#137a37","Rejected":"#b4232a","Withdrawn":"#8d99ae","Ghosted":"#6b7c82","Won't Apply":"#8d99ae"};
 const HIDDEN=['Rejected','Withdrawn','Ghosted',"Won't Apply"];
 const today=new Date().toISOString().slice(0,10);
+function stampApplied(a){ // when a card lands in Applied, stamp the date + a 7-day follow-up
+  if(!a||a.status!=='Applied')return;
+  if(!a.dateApplied)a.dateApplied=today;
+  if(!a.nextFollowup){const d=new Date(a.dateApplied+'T12:00:00');d.setDate(d.getDate()+7);a.nextFollowup=d.toISOString().slice(0,10);}
+}
 
 let state={apps:[]};
 let view='board', sortKey=null, sortDir=1, editingId=null;
@@ -455,7 +460,7 @@ function wireDnD(){
     col.addEventListener('drop',e=>{e.preventDefault();col.classList.remove('over');
       const id=e.dataTransfer.getData('text/plain');const st=STAGES.find(x=>x.key===col.dataset.col);
       const a=state.apps.find(x=>x.id===id);
-      if(a&&st&&stageOf(a.status)!==st.key){a.status=st.primary;save();render();}
+      if(a&&st&&stageOf(a.status)!==st.key){a.status=st.primary;stampApplied(a);save();render();}
     });
     if(col.classList.contains('collapsed'))col.addEventListener('click',e=>{if(e.target.closest('.coltog'))return;toggleCollapse(col.dataset.col);});
   });
@@ -604,6 +609,7 @@ function persistForm(){
     source:g('source'),url:g('url'),notes:g('notes'),resumeLink:g('resumeLink'),coverLink:g('coverLink')};
   if(editingId){Object.assign(state.apps.find(x=>x.id===editingId),data);}
   else{data.id=uid();data.dateAdded=today;state.apps.unshift(data);editingId=data.id;}
+  stampApplied(state.apps.find(x=>x.id===editingId));
   save();return editingId;
 }
 function saveEdit(){if(persistForm()){closeEdit();render();}}

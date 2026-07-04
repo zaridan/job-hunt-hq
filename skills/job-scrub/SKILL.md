@@ -10,6 +10,7 @@ Find newly posted openings that fit the user's thesis, then (1) write a dated re
 ## Ground rules
 - `<root>` is the user's job-hunt folder (contains `Job-Thesis.md` and `Job Tracker App/data.json`). If unknown, ask, or locate with: `find ~ -maxdepth 4 -name data.json -path '*Job Tracker App*'`.
 - `data.json` is the ONLY data store. Never modify `index.html`. Never create `.bak` files. If the app folder is a git repo, commit changes; if not, skip git silently — it is optional.
+- WRITE PATH: if the tracker server is running (`curl -s -m 2 http://localhost:8787/health` returns ok — check from the host if your shell is sandboxed), an open tracker tab will re-POST its in-memory array on the user's next board action, silently clobbering direct disk edits. When the server is up, write THROUGH it: GET `/data.json`, mutate the array, POST the FULL array to `/save` (Content-Type: application/json), and tell the user to refresh the tracker tab (Cmd-R) before touching the board. Only edit data.json directly when the health check fails.
 - Never fabricate listings. If zero new roles, say so.
 
 ## Step 1 — Read the thesis
