@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.9 — 2026-07-04
+- Tracker board: narrower-screen ergonomics for the kanban board.
+  - Collapsible columns: each column header has a chevron that collapses it
+    to a thin vertical strip (name + count). Collapsed strips still accept
+    drops, so you can park a distant column (e.g. "Won't Apply") next to
+    "Screening" and drag cards straight onto it; click a strip to expand.
+  - Show/hide columns menu: a "Columns" dropdown to fully hide/show any
+    column, plus "Reset columns".
+  - Both collapse and hide states persist per browser (localStorage). No
+    change to data.json or the existing "Hide closed & won't-apply" filter.
+
 ## 0.1.8 — 2026-07-02
 - Screening-robustness pass across all three review layers:
   - ATS: explicit .docx formatting rules (single column, no tables/text

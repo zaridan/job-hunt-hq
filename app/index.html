@@ -37,8 +37,25 @@ header .sub{opacity:.85;font-size:12px}
 .board{display:flex;gap:13px;overflow-x:auto;padding-bottom:8px;align-items:flex-start}
 .col{background:#eef1f2;border-radius:12px;padding:10px;min-width:236px;max-width:260px;flex:0 0 auto;max-height:74vh;overflow-y:auto;transition:background .12s}
 .col.over{background:#d7e6ec;outline:2px dashed var(--ink2)}
-.col h2{margin:-10px -10px 10px;padding:10px 10px 8px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#54636b;display:flex;justify-content:space-between;align-items:center;position:sticky;top:-10px;z-index:5;background:inherit;border-radius:12px 12px 0 0;box-shadow:0 4px 6px -4px rgba(20,30,35,.15)}
+.col h2{margin:-10px -10px 10px;padding:10px 10px 8px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#54636b;display:flex;gap:6px;align-items:center;position:sticky;top:-10px;z-index:5;background:inherit;border-radius:12px 12px 0 0;box-shadow:0 4px 6px -4px rgba(20,30,35,.15)}
+.col h2 .colname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .col h2 .ct{background:#dde4e6;border-radius:10px;padding:0 7px;font-size:11px}
+.coltog{border:0;background:transparent;color:#8a99a0;cursor:pointer;font-size:11px;padding:0 2px;line-height:1;flex:none}
+.coltog:hover{color:var(--ink2)}
+.drophint{font-size:12px;color:#9aa7ac;padding:4px}
+/* collapsed column → thin vertical strip that still accepts drops */
+.col.collapsed{min-width:44px;max-width:44px;width:44px;padding:10px 4px;cursor:pointer}
+.col.collapsed .cardx,.col.collapsed .drophint{display:none}
+.col.collapsed h2{flex-direction:column;gap:9px;margin:-10px -4px 0;padding:10px 0 4px;box-shadow:none}
+.col.collapsed h2 .colname{flex:none;writing-mode:vertical-rl;text-orientation:mixed;letter-spacing:.08em;white-space:nowrap;max-height:150px}
+/* columns show/hide menu */
+.colwrap{position:relative}
+.colmenu{position:absolute;top:calc(100% + 6px);left:0;z-index:40;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(20,30,35,.18);padding:8px;min-width:210px;display:none}
+.colmenu.show{display:block}
+.colmenu .cm-hint{font-size:11px;color:var(--muted);padding:2px 8px 6px}
+.colmenu .cm-row{display:flex;align-items:center;gap:9px;padding:6px 8px;font-size:13px;border-radius:7px;cursor:pointer}
+.colmenu .cm-row:hover{background:#f2f6f7}
+.colmenu .cm-foot{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;display:flex;justify-content:space-between;gap:8px}
 .cardx{background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:9px;overflow:hidden;cursor:grab}
 .cardx[open]{cursor:default}
 .cardx>summary{list-style:none;padding:10px 11px}
@@ -105,6 +122,7 @@ footer{color:var(--muted);font-size:12px;margin-top:22px;display:flex;gap:14px;f
     <input type="search" id="q" placeholder="Search company, role, notes…" oninput="render()">
     <select id="sf" onchange="render()"><option value="">All statuses</option></select>
     <label class="chk"><input type="checkbox" id="sc" onchange="render()"> Hide closed &amp; won't-apply</label>
+    <span class="colwrap" id="colwrap"><button class="btn" id="btnCols" type="button">Columns ▾</button><div class="colmenu" id="colmenu"></div></span>
     <span id="filestat" class="filechip">Browser storage</span>
     <span class="spacer"></span>
     <button class="btn" id="btnGen" style="display:none" onclick="genDocs()" title="Opens Claude — press ▶ in the Job Docs artifact to run the generator">⚡ Generate docs</button>
@@ -238,6 +256,26 @@ const today=new Date().toISOString().slice(0,10);
 
 let state={apps:[]};
 let view='board', sortKey=null, sortDir=1, editingId=null;
+let collapsedCols=new Set(), hiddenCols=new Set();
+function loadColPrefs(){
+  try{collapsedCols=new Set(JSON.parse(localStorage.getItem('jobhunt_collapsed_cols')||'[]'));}catch(e){collapsedCols=new Set();}
+  try{hiddenCols=new Set(JSON.parse(localStorage.getItem('jobhunt_hidden_cols')||'[]'));}catch(e){hiddenCols=new Set();}
+}
+function saveColPrefs(){try{localStorage.setItem('jobhunt_collapsed_cols',JSON.stringify([...collapsedCols]));localStorage.setItem('jobhunt_hidden_cols',JSON.stringify([...hiddenCols]));}catch(e){}}
+function toggleCollapse(key){if(collapsedCols.has(key))collapsedCols.delete(key);else collapsedCols.add(key);saveColPrefs();renderBoard(visible(state.apps));}
+function toggleHidden(key){if(hiddenCols.has(key))hiddenCols.delete(key);else hiddenCols.add(key);saveColPrefs();render();}
+function resetCols(){collapsedCols.clear();hiddenCols.clear();saveColPrefs();buildColMenu();render();}
+function buildColMenu(){
+  const m=document.getElementById('colmenu');if(!m)return;
+  let h='<div class="cm-hint">Show / hide columns</div>';
+  STAGES.forEach((s,i)=>{const shown=!hiddenCols.has(s.key);
+    h+=`<label class="cm-row"><input type="checkbox" ${shown?'checked':''} data-vis="${i}"><span style="flex:1">${esc(s.key)}</span></label>`;});
+  h+='<div class="cm-foot"><span class="minibtn" id="cmReset">Reset columns</span><span class="minibtn" id="cmClose">Done</span></div>';
+  m.innerHTML=h;
+  m.querySelectorAll('input[data-vis]').forEach(cb=>cb.addEventListener('change',()=>toggleHidden(STAGES[+cb.dataset.vis].key)));
+  document.getElementById('cmReset').addEventListener('click',resetCols);
+  document.getElementById('cmClose').addEventListener('click',()=>m.classList.remove('show'));
+}
 
 function uid(){return 'app-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 function load(){
@@ -350,7 +388,9 @@ function stageOf(s){for(const st of STAGES){if(st.match.includes(s))return st.ke
 function dueClass(d){return d&&d<=today?'due':'';}
 
 function setView(v){view=v;document.getElementById('vb').classList.toggle('on',v==='board');document.getElementById('vt').classList.toggle('on',v==='table');
-  document.getElementById('board').classList.toggle('hidden',v!=='board');document.getElementById('table').classList.toggle('hidden',v!=='table');render();}
+  document.getElementById('board').classList.toggle('hidden',v!=='board');document.getElementById('table').classList.toggle('hidden',v!=='table');
+  const cw=document.getElementById('colwrap');if(cw){cw.style.display=v==='board'?'':'none';if(v!=='board')document.getElementById('colmenu').classList.remove('show');}
+  render();}
 
 function initFilters(){const sel=document.getElementById('sf');const cur=sel.value;
   sel.innerHTML='<option value="">All statuses</option>'+ALL_STATUSES.map(s=>`<option ${s===cur?'selected':''}>${s}</option>`).join('');}
@@ -391,11 +431,14 @@ function card(a){
   </details>`;}
 
 function renderBoard(list){const hide=document.getElementById('sc').checked;
-  const stages=STAGES.filter(s=>!(s.hide&&hide));
+  const stages=STAGES.filter(s=>!(s.hide&&hide)).filter(s=>!hiddenCols.has(s.key));
   document.getElementById('board').innerHTML=stages.map(s=>{
     const items=list.filter(a=>stageOf(a.status)===s.key);
     if(s.key==='Screening')items.sort((x,y)=>(parseInt(y.fitScore)||0)-(parseInt(x.fitScore)||0));
-    return `<div class="col" data-col="${esc(s.key)}"><h2>${esc(s.key)}<span class="ct">${items.length}</span></h2>${items.map(card).join('')||'<div style="font-size:12px;color:#9aa7ac;padding:4px">drop here</div>'}</div>`;
+    const collapsed=collapsedCols.has(s.key);
+    const chev=collapsed?'▸':'▾';
+    const body=collapsed?'':(items.map(card).join('')||'<div class="drophint">drop here</div>');
+    return `<div class="col${collapsed?' collapsed':''}" data-col="${esc(s.key)}"><h2><button class="coltog" type="button" title="${collapsed?'Expand':'Collapse'} column">${chev}</button><span class="colname">${esc(s.key)}</span><span class="ct">${items.length}</span></h2>${body}</div>`;
   }).join('');
   wireDnD();}
 
@@ -412,7 +455,9 @@ function wireDnD(){
       const a=state.apps.find(x=>x.id===id);
       if(a&&st&&stageOf(a.status)!==st.key){a.status=st.primary;save();render();}
     });
-  });}
+    if(col.classList.contains('collapsed'))col.addEventListener('click',e=>{if(e.target.closest('.coltog'))return;toggleCollapse(col.dataset.col);});
+  });
+  document.querySelectorAll('.coltog').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();toggleCollapse(b.closest('.col').dataset.col);}));}
 
 function renderTable(list){
   let items=visible(list);
@@ -594,9 +639,12 @@ document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeEdit();});
 fillStatusSelect();
 load();
+loadColPrefs();
 initFilters();
 stamp();
 render();
+document.getElementById('btnCols').addEventListener('click',e=>{e.stopPropagation();const m=document.getElementById('colmenu');const open=!m.classList.contains('show');if(open)buildColMenu();m.classList.toggle('show',open);});
+document.addEventListener('click',e=>{if(!e.target.closest('#colwrap'))document.getElementById('colmenu').classList.remove('show');});
 initServerSync().then(ok=>{
   if(ok){initFilters();stamp();render();updateFileStatus();}
   else{initFileSync();}
