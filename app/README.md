@@ -54,7 +54,7 @@ and **CSV** for spreadsheets.
 | `GET /data.json` | current data, never cached |
 | `POST /save` | validates + atomically writes `data.json`, rotates a backup |
 | `GET /open?url=` | opens an http(s) link in the default browser |
-| `GET /reveal?path=` | shows a tailored .docx in the file manager (Finder/Explorer select the file; Linux opens its folder) for drag-and-drop into applications |
+| `GET /reveal?path=` | shows a tailored PDF in the file manager (Finder/Explorer select the file; Linux opens its folder) for drag-and-drop into applications |
 | `GET /health` | lets the app detect server mode |
 
 Localhost-only, single instance (safe to invoke repeatedly), Python 3 stdlib.
@@ -75,7 +75,7 @@ directly — the app picks changes up on next load:
   "thesis," writes a dated review file, appends new roles as `Screening`.
 - **job-reply-monitor** — scans Gmail for application replies and advances
   statuses (`Phone Screen`, `Interviewing`, `Rejected`, …).
-- **nightly-tailored-cleanup** — archives tailored resume/cover-letter files
+- **nightly-tailored-cleanup** — archives a company's Applications/<Company>/ folder once all its roles are applied and none are active
   for roles that are no longer active (`cleanup_applied.py`).
 
 Resumes and cover letters themselves are generated in chat — the app just

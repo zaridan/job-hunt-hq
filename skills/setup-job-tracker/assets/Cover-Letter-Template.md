@@ -1,6 +1,6 @@
 # Cover Letter Template
 
-> Copy into `Cover Letters/Tailored/` as `[Company] - [Role] - Cover Letter.md`.
+> Copy into `Applications/[Company]/` as `[Full Name] - Cover Letter.md` (export a PDF alongside).
 > Fill the [BRACKETS]. Aim for ~250-350 words, three to four short paragraphs.
 >
 > **Write it so it could only be sent to this one company.** Don't echo the

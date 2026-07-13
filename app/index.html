@@ -491,8 +491,8 @@ function render(){
 
 /* ---------- documents (written by Claude, surfaced here) ---------- */
 /* The app does not generate anything. The hourly generator (Claude) writes
-   drafts into this app's data (resumeMD/coverMD) plus .docx files in
-   Resume/Tailored + Cover Letters/Tailored, and stamps the outcome into
+   drafts into this app's data (resumeMD/coverMD) plus PDF files in
+   Applications/<Company>/ folders, and stamps the outcome into
    notes as [docs: generated …] or [docs: skipped … — reason]. The cards
    surface that state below. */
 function hasDocs(a){return !!(a.resumeMD||a.coverMD||a.resumeLink||a.coverLink);}
@@ -523,7 +523,7 @@ function docLink(a,which){
   const md=which==='resume'?a.resumeMD:a.coverMD;
   const label=which==='resume'?'📄 Résumé':'✉ Cover letter';
   if(md){let h=`<span class="minibtn" onclick="openDoc('${a.id}','${which}')" title="View Claude-written draft">${label}</span>`;
-    if(serverMode)h+=`<span class="minibtn" onclick="revealDoc('${a.id}','${which}')" title="Show the .docx in your file manager — drag it straight into the application">📂</span>`;
+    if(serverMode)h+=`<span class="minibtn" onclick="revealDoc('${a.id}','${which}')" title="Show the file in your file manager — drag it straight into the application">📂</span>`;
     else h+=`<span class="minibtn" onclick="downloadDoc('${a.id}','${which}')" title="Download .md">⬇</span>`;
     return h;}
   if(ext)return `<a class="btnlink" href="${esc(ext)}" target="_blank" rel="noopener">${label} ↗</a>`;
@@ -531,9 +531,10 @@ function docLink(a,which){
 }
 function revealDoc(id,which){const a=state.apps.find(x=>x.id===id);if(!a)return;
   const kind=which==='resume'?'Resume':'Cover Letter';
+  const stamped=which==='resume'?a.resumePath:a.coverPath;
   const folder=which==='resume'?'Resume/Tailored':'Cover Letters/Tailored';
   const name=((a.company||'')+' - '+(a.role||'')+' - '+kind+'.docx').replace(/[\/:]/g,'');
-  fetch('reveal?path='+encodeURIComponent(folder+'/'+name))
+  fetch('reveal?path='+encodeURIComponent(stamped||(folder+'/'+name)))
     .then(r=>r.json())
     .then(j=>{if(!j.ok)toast('⚠ '+(j.error||'Could not reveal file'));else if(j.note)toast(j.note);})
     .catch(()=>toast('⚠ Could not reach the tracker server.'));

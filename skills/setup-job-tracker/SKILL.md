@@ -16,12 +16,11 @@ If a folder is already connected to this session/project, DEFAULT to it: confirm
 ├── START-HERE.md
 ├── Job-Thesis.md
 ├── Job Tracker App/          (the app — copied in Step 2)
+├── Applications/             (per-company folders of tailored docs, added as you apply)
 ├── Resume/
-│   ├── Master-Resume.md
-│   └── Tailored/
+│   └── Master-Resume.md
 ├── Cover Letters/
-│   ├── Cover-Letter-Template.md
-│   └── Tailored/
+│   └── Cover-Letter-Template.md
 ├── Company Research/
 │   └── Company-Research-Template.md
 └── Job Listings/

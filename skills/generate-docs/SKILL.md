@@ -44,17 +44,21 @@ Read each draft back and verify all of the following. If any fails, revise befor
 - **No echo:** no phrase or sentence stem is lifted from the posting; the cover letter is not the job description rephrased.
 - **No template smell:** bullets don't share a repeated stem with only the noun/number swapped; the cover letter opening is not reusable across companies.
 - **Traceable:** every skill, title, date, and metric maps to something real in the master resume.
-- **Not a sibling:** open the 2–3 most recently generated cover letters in `Cover Letters/Tailored/` (including `Applied/`) and compare. No shared opening sentence, closing sentence, or near-verbatim anecdote phrasing. The same true story may appear in two letters, but told differently and only where it is the strongest match — rotate which achievements lead when the posting allows. A recruiter who sees two of these letters should not be able to tell they came from the same template.
+- **Not a sibling:** open the 2–3 most recently generated cover letters (the newest `* - Cover Letter.md` files across the `Applications/*/` company folders, including any `Applications/Archive/`) and compare. No shared opening sentence, closing sentence, or near-verbatim anecdote phrasing. The same true story may appear in two letters, but told differently and only where it is the strongest match — rotate which achievements lead when the posting allows. A recruiter who sees two of these letters should not be able to tell they came from the same template.
 - **Sounds human:** read it aloud in your head — if it sounds like LinkedIn boilerplate rather than a person describing their own work, fix it. Check the tics: stock openers/closers, em-dash pileups, "not just X but Y" constructions, rule-of-three lists in every paragraph, and statistically smooth prose — vary sentence length; a blunt short sentence is a feature.
 - **Consistent pair:** the resume and cover letter must agree with each other — same titles, dates, and numbers, same register and voice. Screeners (human and LLM) cross-check the two documents; a polished letter stapled to a differently-voiced resume reads as generated.
 If a card can only be filled with generic material because the genuine match is weak, prefer a shorter, rougher, honest document over a polished generic one — and note the weak fit in the report rather than hiding it.
 
 ## Step 5 — Write the files
-- `<root>/Resume/Tailored/<Company> - <Role> - Resume.md` and `.docx`
-- `<root>/Cover Letters/Tailored/<Company> - <Role> - Cover Letter.md` and `.docx`
-Sanitize "/" and ":" out of filenames. Build .docx with the docx skill (read its SKILL.md first): clean single-column professional layout matching the .md content.
+Save both documents into a per-company folder so a company's resume and cover letter live together:
+- `<root>/Applications/<Company>/<Candidate> - Resume.pdf` and `<Candidate> - Resume.md`
+- `<root>/Applications/<Company>/<Candidate> - Cover Letter.pdf` and `<Candidate> - Cover Letter.md`
 
-ATS-safe formatting rules for the resume .docx (parsers scramble anything else):
+`<Company>` is the card's company (sanitize "/" and ":"); one folder per company, shared across that company's roles. `<Candidate>` is the applicant's recruiter-facing name from the master resume's name header — plain First Last, no nicknames or parentheticals (e.g. "Thomas (TJ) Baker" → "Thomas Baker"). If a company has two active roles that genuinely need different documents, disambiguate by inserting the role: `<Candidate> - <Role> - Resume.pdf`.
+
+The deliverable is a **text-based PDF** (selectable text, never a scanned image) plus the editable `.md` source — do NOT save `.docx`. Build the PDF from a clean single-column layout: render the markdown with the docx skill (read its SKILL.md first) into a temporary `.docx`, convert that to PDF with LibreOffice (`soffice --headless --convert-to pdf`), then discard the `.docx`. Verify the PDF is text-selectable, not an image (`pdftotext <file> - | wc -w` returns a real word count).
+
+ATS-safe layout rules for the resume PDF — apply them in the intermediate .docx so they carry into the exported PDF (parsers scramble anything else):
 - Single column. No tables, text boxes, images, icons, or graphics anywhere.
 - Contact info in the document body, never in the Word header/footer (many parsers drop headers/footers entirely).
 - Standard section headings: "Summary", "Skills"/"Core Competencies", "Professional Experience", "Education" — no creative titles.
@@ -63,7 +67,7 @@ ATS-safe formatting rules for the resume .docx (parsers scramble anything else):
 - Bold section headings, job titles, and company names only — never words, numbers, or keywords inside sentences (mid-sentence bolding is a known AI tell, and parsers don't care).
 
 ## Step 6 — Stamp the card
-For each processed entry set: `resumeMD` and `coverMD` = the full markdown (powers the app's built-in viewers), `resumeVersion` = "Tailored YYYY-MM-DD", `coverLetter` = "Yes", and append "[docs: generated YYYY-MM-DD]" to notes. Preserve everything else. VALIDATE: JSON parses, length unchanged, only intended entries differ. Best-effort: `git -C "<root>/Job Tracker App" add data.json && git commit -m "generate-docs: <companies>"`.
+For each processed entry set: `resumeMD` and `coverMD` = the full markdown (powers the app's built-in viewers), `resumePath` and `coverPath` = the root-relative POSIX paths to the two PDFs (e.g. `Applications/<Company>/<Candidate> - Resume.pdf`), `resumeVersion` = "Tailored YYYY-MM-DD", `coverLetter` = "Yes", and append "[docs: generated YYYY-MM-DD]" to notes. Preserve everything else. VALIDATE: JSON parses, length unchanged, only intended entries differ. Best-effort: `git -C "<root>/Job Tracker App" add data.json && git commit -m "generate-docs: <companies>"`.
 
 ## Step 7 — Report
-Which cards got documents, which were skipped and why, and flag any where the genuine fit was weak so the user can decide whether to apply. Remind the user to review drafts before sending, and to rename the file on upload to `<First-Last> - Resume.docx` (or a text-selectable PDF export) — recruiters expect the candidate's name in the filename, not the company's. Never regenerate a card that already has documents.
+Which cards got documents, which were skipped and why, and flag any where the genuine fit was weak so the user can decide whether to apply. Remind the user to review drafts before sending. The files are already candidate-named and exported as text-based PDF (with editable `.md` alongside) in `Applications/<Company>/`, so they upload as-is — the recruiter gets the candidate's name in the filename and a format that renders identically everywhere. Never regenerate a card that already has documents.

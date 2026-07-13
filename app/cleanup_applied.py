@@ -1,73 +1,78 @@
 #!/usr/bin/env python3
-"""
-Nightly tidy: move tailored resumes & cover letters for roles that are already
-applied (or further along) into an `Applied/` subfolder, so the working list of
-tailored materials stays short.
+"""Nightly tidy: move a company's application folder into Applications/Archive/
+once all of that company's roles are applied (or further along) and none are
+still active, so the working Applications/ list stays short.
 
-Rule (per company, matched on the "Company - ..." filename prefix):
-  - Archive a company's tailored files only if that company has at least one role
-    at status Applied / Phone Screen / Interviewing / Offer AND has NO role still
-    active (To Apply / Screening). This protects shared resumes (e.g. one Samsara
-    resume used by several roles) from being archived while any of those roles is
-    still open.
-  - "Won't Apply" roles are ignored (left where they are).
+Rule (per company, matched on the Applications/<Company>/ folder name):
+  - Archive a company's folder only if that company has at least one role at
+    status Applied / Phone Screen / Interviewing / Offer AND has NO role still
+    active (To Apply / Screening). This protects a shared resume + cover letter
+    while any of that company's roles is still open.
+  - "Won't Apply" / "Rejected" / "Closed" roles neither keep a folder active nor
+    trigger archiving on their own.
 
-Idempotent and safe to run repeatedly. Resolves the Job Hunt root relative to this
-script's own location, so it works regardless of absolute path.
+Idempotent and safe to run repeatedly. Resolves the Job Hunt root relative to
+this script's own location, so it works regardless of absolute path.
 """
-import json, shutil
+import json
+import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent            # <root>/Job Tracker App/.. = <root>
 DATA = ROOT / "Job Tracker App" / "data.json"
-TAILORED_DIRS = [ROOT / "Resume" / "Tailored", ROOT / "Cover Letters" / "Tailored"]
-
+APPS_DIR = ROOT / "Applications"
+ARCHIVE_DIR = APPS_DIR / "Archive"
 ARCHIVE_STATUSES = {"Applied", "Phone Screen", "Interviewing", "Offer"}
-ACTIVE_STATUSES  = {"To Apply", "Screening"}
+ACTIVE_STATUSES = {"To Apply", "Screening"}
 
-def company_of_filename(name: str) -> str:
-    # "Capacity - Solution Consultant - Resume.docx" -> "Capacity"
-    return name.split(" - ", 1)[0].strip().lower()
+
+def norm(name: str) -> str:
+    # match generate-docs folder naming (company with "/" and ":" stripped)
+    return (name or "").replace("/", "").replace(":", "").strip().lower()
+
 
 def main():
     apps = json.load(open(DATA))
     archive_co, active_co = set(), set()
     for a in apps:
-        co = (a.get("company") or "").strip().lower()
+        co = norm(a.get("company"))
         if not co:
             continue
         if a.get("status") in ACTIVE_STATUSES:
             active_co.add(co)
         elif a.get("status") in ARCHIVE_STATUSES:
             archive_co.add(co)
+
     # A company is archivable only if it has applied-stage roles and no active ones.
     archivable = archive_co - active_co
 
-    moved, summary = [], []
-    for d in TAILORED_DIRS:
-        if not d.is_dir():
-            continue
-        applied_dir = d / "Applied"
-        applied_dir.mkdir(exist_ok=True)
-        for f in d.iterdir():
-            if not f.is_file():
+    moved, remaining = [], []
+    if APPS_DIR.is_dir():
+        for d in sorted(APPS_DIR.iterdir()):
+            if not d.is_dir() or d.resolve() == ARCHIVE_DIR.resolve():
                 continue
-            if company_of_filename(f.name) in archivable:
-                dest = applied_dir / f.name
-                shutil.move(str(f), str(dest))
-                moved.append(str(dest.relative_to(ROOT)))
-        remaining = sorted(p.name for p in d.iterdir() if p.is_file())
-        summary.append((str(d.relative_to(ROOT)), remaining))
+            if norm(d.name) in archivable:
+                ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
+                dest = ARCHIVE_DIR / d.name
+                if dest.exists():
+                    # merge into the existing archive folder, then drop the empty source
+                    for f in d.iterdir():
+                        shutil.move(str(f), str(dest / f.name))
+                    d.rmdir()
+                else:
+                    shutil.move(str(d), str(dest))
+                moved.append(d.name)
+            else:
+                remaining.append(d.name)
 
-    print(f"Archived {len(moved)} file(s).")
+    print(f"Archived {len(moved)} company folder(s).")
     for m in moved:
-        print("  moved:", m)
+        print("  archived:", m)
     print()
-    for dname, remaining in summary:
-        print(f"Still active in {dname}/ ({len(remaining)}):")
-        for r in remaining:
-            print("   ", r)
-        print()
+    print(f"Still active in Applications/ ({len(remaining)}):")
+    for r in remaining:
+        print("   ", r)
+
 
 if __name__ == "__main__":
     main()

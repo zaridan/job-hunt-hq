@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.0 — 2026-07-13
+- **Application docs are now text-based PDF, organized per company.** `generate-docs`
+  writes each role's résumé and cover letter as a text-selectable PDF (plus an
+  editable `.md` source) into a per-company `Applications/<Company>/` folder, named
+  for the candidate (e.g. `Thomas Baker - Resume.pdf`), instead of `.docx` files
+  split across `Resume/Tailored/` and `Cover Letters/Tailored/`. PDFs render
+  identically everywhere and upload cleanly to ATSes.
+- Cards now store `resumePath`/`coverPath`; the tracker's reveal button opens the
+  PDF directly (older cards fall back to the legacy path).
+- `cleanup_applied.py` / `docs-cleanup` now archive a whole `Applications/<Company>/`
+  folder into `Applications/Archive/` once all of that company's roles are applied
+  and none are still active.
+- `install.py` now creates an `Applications/` folder and no longer pre-creates the
+  `Resume/Tailored` and `Cover Letters/Tailored` subfolders.
+
 ## 0.1.10 — 2026-07-04
 - Tracker cards now show an "added" date (＋ date, with a relative-age
   tooltip) so you can see at a glance when a role landed in Screening.

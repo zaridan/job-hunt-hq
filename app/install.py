@@ -10,7 +10,7 @@ Idempotent: safe to re-run; never overwrites an existing data.json or any
 file the user may have edited (existing files are left untouched).
 
 Does, in order:
- 1. Creates the folder structure (Resume/Tailored, Cover Letters/Tailored,
+ 1. Creates the folder structure (Applications, Resume, Cover Letters,
     Company Research, Job Listings, Job Tracker App).
  2. Copies the app files (this script's siblings) into Job Tracker App/.
  3. Creates data.json ([]) if absent; marks launch.sh executable.
@@ -30,7 +30,7 @@ import sys
 
 APP_FILES = ["index.html", "server.py", "launch.py", "launch.sh",
              "cleanup_applied.py", "README.md", ".gitignore"]
-SUBDIRS = ["Job Tracker App", "Resume/Tailored", "Cover Letters/Tailored",
+SUBDIRS = ["Job Tracker App", "Applications", "Resume", "Cover Letters",
            "Company Research", "Job Listings"]
 
 MAC_COMMAND = """#!/bin/bash

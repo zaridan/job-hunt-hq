@@ -24,7 +24,7 @@ No accounts, no cloud, no build step. Works standalone even without Claude.
 | `setup-job-tracker` | Installs the app into your folder, interviews you to build your Job Thesis and Master Resume, offers the automations |
 | `job-scrub` | Searches job boards for new roles, fit-scores each 0–100 against your thesis, captures the posting text, adds them to Screening (sorted by fit) |
 | `reply-monitor` | Checks your email for application replies (scheduled or on demand) and advances the matching cards |
-| `generate-docs` | Tailors a resume + cover letter (.md + .docx) for each To Apply role, from the real posting |
+| `generate-docs` | Tailors a resume + cover letter (text-based PDF + editable .md) for each To Apply role, from the real posting |
 | `docs-cleanup` | Archives materials for roles you've finished applying to |
 
 ## Getting started
@@ -85,8 +85,8 @@ docs." Claude reads the actual posting (captured at scrub time or fetched
 fresh), trims and reorders your Master Resume to match it — never inventing
 anything — and writes a cover letter with a real hook about that company. The
 results land in two places: 📄/✉ buttons on the card itself (view or
-print-to-PDF), and ready-to-send `.docx` files in your `Resume/Tailored/` and
-`Cover Letters/Tailored/` folders. Cards that already have documents are
+print-to-PDF), and ready-to-send PDF files (with an editable `.md` alongside) in per-company
+`Applications/<Company>/` folders. Cards that already have documents are
 never regenerated. Proofread before you send — they're drafts with your name
 on them.
 
