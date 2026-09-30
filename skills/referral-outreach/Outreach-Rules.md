@@ -47,9 +47,17 @@ Neither skill's Send section covers the other's list. Running just one of them (
   - If `curl -s -m 2 http://localhost:8787/health` returns ok, GET `http://localhost:8787/data.json`, change the array, and POST the full array to `/save` with `Content-Type: application/json`.
   - Otherwise, edit the file directly.
   - Either way, keep every existing entry and field.
-- **Commit** at the end of each run, only if `Job Tracker App/` is a git repo (git is optional; skip silently otherwise):
+- **Commit** at the end of each run, only if git is set up (it's optional; skip silently otherwise). Run from `<root>`:
   ```bash
-  git -C "Job Tracker App" add -A && { git -C "Job Tracker App" diff --cached --quiet || git -C "Job Tracker App" commit -m "<skill>: <one-line summary>"; }
+  if git -C "Job Tracker App" rev-parse >/dev/null 2>&1; then
+    git -C "Job Tracker App" add -A .
+    # If the whole job-hunt folder is one repo, also commit what the skills wrote around the app.
+    if [ "$(git -C "Job Tracker App" rev-parse --show-toplevel)" = "$(pwd -P)" ]; then
+      for p in "Job Listings" Applications Resume Referral; do [ -e "$p" ] && git add -A -- "$p"; done
+      git add -- New-Openings-*.md 2>/dev/null || true
+    fi
+    git -C "Job Tracker App" diff --cached --quiet || git -C "Job Tracker App" commit -m "<skill>: <one-line summary>"
+  fi
   ```
 
 ## Writing messages
