@@ -11,8 +11,9 @@ file the user may have edited (existing files are left untouched).
 
 Does, in order:
  1. Creates the folder structure (Applications, Resume, Cover Letters,
-    Company Research, Job Listings, Job Tracker App).
- 2. Copies the app files (this script's siblings) into Job Tracker App/.
+    Company Research, Job Listings, Referral, Job Tracker App).
+ 2. Copies the app files (this script's siblings) into Job Tracker App/,
+    and the referral message templates into Referral/Templates/.
  3. Creates data.json ([]) if absent; marks launch.sh executable.
  4. Generates a double-clickable launcher-maker:
       macOS  -> "Make Job Tracker Launcher.command" (builds an /Applications
@@ -29,9 +30,16 @@ import stat
 import sys
 
 APP_FILES = ["index.html", "server.py", "launch.py", "launch.sh",
-             "cleanup_applied.py", "README.md", ".gitignore"]
+             "cleanup_applied.py", "README.md", ".gitignore",
+             # People tab + referral outreach
+             "people.css", "people-core.js", "people.js",
+             "contacts_store.py", "outreach-config.json"]
 SUBDIRS = ["Job Tracker App", "Applications", "Resume", "Cover Letters",
-           "Company Research", "Job Listings"]
+           "Company Research", "Job Listings", "Referral"]
+# Referral message templates ship with the referral-outreach skill; the user
+# gets their own editable copies.
+TEMPLATE_SRC = os.path.join("..", "skills", "referral-outreach", "templates")
+TEMPLATE_DEST = os.path.join("Referral", "Templates")
 
 MAC_COMMAND = """#!/bin/bash
 # Double-click me once. I create a "Job Tracker" app you can open from
@@ -100,6 +108,20 @@ def main():
         else:
             shutil.copy2(s, t)
             result["created"].append(f)
+
+    tsrc = os.path.normpath(os.path.join(src, TEMPLATE_SRC))
+    if os.path.isdir(tsrc):
+        tdest = os.path.join(root, TEMPLATE_DEST)
+        os.makedirs(tdest, exist_ok=True)
+        for f in sorted(os.listdir(tsrc)):
+            if not f.endswith(".md"):
+                continue
+            rel = os.path.join(TEMPLATE_DEST, f)
+            if os.path.exists(os.path.join(tdest, f)):
+                result["skipped"].append(rel)
+            else:
+                shutil.copy2(os.path.join(tsrc, f), os.path.join(tdest, f))
+                result["created"].append(rel)
 
     data = os.path.join(appdir, "data.json")
     if not os.path.exists(data):

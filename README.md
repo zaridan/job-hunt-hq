@@ -17,7 +17,7 @@ To Apply → Applied → Phone Screen → Interviewing → Offer) backed by one
 atomic saves, rolling backups, and opens job links in your default browser.
 No accounts, no cloud, no build step. Works standalone even without Claude.
 
-**Five skills:**
+**Eight skills:**
 
 | Skill | What it does |
 |---|---|
@@ -26,6 +26,17 @@ No accounts, no cloud, no build step. Works standalone even without Claude.
 | `reply-monitor` | Checks your email for application replies (scheduled or on demand) and advances the matching cards |
 | `generate-docs` | Tailors a resume + cover letter (text-based PDF + editable .md) for each To Apply role, from the real posting |
 | `docs-cleanup` | Archives materials for roles you've finished applying to |
+| `linkedin-job-search` | *(optional, needs Claude in Chrome)* Searches LinkedIn Jobs in your own browser, fit-scores roles against your thesis, adds them to Screening |
+| `people-finder` | *(optional, needs Claude in Chrome)* Finds people at your To Apply companies most likely to refer you (former colleagues, fellow alumni, the role's team, recruiters), and sends connection requests only after you approve the exact list |
+| `referral-outreach` | *(optional, needs Claude in Chrome)* Drafts a tailored referral ask per contact with your chosen resume attached, tracks replies, drafts one follow-up; sends only what you approve |
+
+**The People tab.** Next to the job board, a **Jobs | People** switch opens
+the referral pipeline (Found → Queued → Requested → Connected → Asked →
+Referred), kept in `contacts.json` beside `data.json`, with the same Board
+and Table views. There you approve or skip people, choose who gets a
+connection note, pick the resume for each ask (tailored, your base resume,
+or an uploaded PDF), and approve the drafted message. Each job card shows
+how far its company's referral pipeline has got.
 
 ## Getting started
 
@@ -113,6 +124,11 @@ reality check" so searches target roles your track record actually supports.
   your resume to boards, no sending email on your behalf. Recruiters can
   tell when applications are automated, and it burns your credibility. Every
   application is you, clicking submit.
+- **It never messages anyone without your yes.** The optional LinkedIn
+  outreach drafts connection notes and referral asks, but scheduled runs are
+  read-only. Anything that goes out is shown to you first as an exact list,
+  and sent only after you say yes to that list in chat. It stops at any
+  LinkedIn warning, limit or checkpoint instead of working around it.
 - **It doesn't replace your judgment.** Fit scores are a triage aid, not a
   verdict — you decide what's worth chasing.
 - **Its drafts are drafts.** Always proofread the generated resume and cover

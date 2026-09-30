@@ -11,7 +11,7 @@ save to that browser's storage. Good for trying it out or GitHub Pages hosting.
 **Recommended (server mode):** run `python3 server.py` (stdlib only, no
 installs) and open http://localhost:8787. Now `data.json` on disk is the
 single source of truth — every edit is written to it atomically, with rolling
-backups in `backups/` (last 20 kept). The status chip shows
+backups in `backups/` (last 20 of each file kept). The status chip shows
 `🖥 data.json · server-synced`.
 
 **One step (any platform):** `python3 launch.py` (Windows: `py launch.py`)
@@ -30,6 +30,14 @@ bundle (macOS) or a desktop shortcut (Windows/Linux) for one-click launch.
 - **Search & filter** — by text or status; hide closed/won't-apply.
 - **Action panel** — surfaces follow-ups due and highest-excitement
   "To Apply" roles.
+- **People tab** — the **Jobs | People** switch opens the referral pipeline
+  (`contacts.json`), with its own Board and Table, stat cards, and a form to
+  add, edit or delete a person. Needs server mode. The URL remembers which
+  screen you're on (`#people/table`, …), so a refresh keeps your place.
+  `contacts_store.py` is the command-line door the outreach skills use; it
+  writes through the server when it's running. Settings (default resume,
+  note length, pacing, optional request/note limits) are in
+  `outreach-config.json`.
 
 ## Storage modes (auto-detected, in priority order)
 
@@ -53,6 +61,9 @@ and **CSV** for spreadsheets.
 | `GET /` | serves the app |
 | `GET /data.json` | current data, never cached |
 | `POST /save` | validates + atomically writes `data.json`, rotates a backup |
+| `GET /contacts.json` | referral contacts for the People tab (`[]` if none), never cached; `X-Contacts-Revision` header for conflict checks |
+| `POST /save-contacts` | validates + atomically writes `contacts.json`, rotates a `contacts-*` backup; a stale `X-Base-Revision` gets a 409 |
+| `POST /upload-attachment?contact=&name=` | saves an uploaded resume PDF (≤10 MB) to `Resume/Uploads/<Company>/` and returns its path |
 | `GET /open?url=` | opens an http(s) link in the default browser |
 | `GET /reveal?path=` | shows a tailored PDF in the file manager (Finder/Explorer select the file; Linux opens its folder) for drag-and-drop into applications |
 | `GET /health` | lets the app detect server mode |

@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.3.0 — 2026-09-30
+- **People tab and LinkedIn referral outreach (optional).** A **Jobs | People**
+  switch in the tracker opens a referral pipeline (Found → Queued → Requested →
+  Connected → Asked → Referred, plus Declined / No response / Skipped), stored in
+  `contacts.json` next to `data.json`, with Board and Table views, stat cards, and
+  an add/edit/delete form. Job cards show how far their company's pipeline has got.
+- Three new skills, all needing the Claude in Chrome extension and all read-only
+  on LinkedIn unless the user approves an exact list in chat:
+  `linkedin-job-search` (LinkedIn Jobs → Screening), `people-finder` (people most
+  likely to refer you, acceptance checks, supervised connection requests) and
+  `referral-outreach` (tailored asks with a resume attached, reply checks, one
+  follow-up, supervised sends). Shared guardrails live in
+  `skills/referral-outreach/Outreach-Rules.md`; message templates are copied to
+  `Referral/Templates/` for the user to edit.
+- Per contact, the ask's resume can be the tailored PDF from `generate-docs`, a
+  base resume (`baseResumePath`), or a PDF uploaded from the People tab.
+- Server: `GET /contacts.json` and `POST /save-contacts` (validated, atomic,
+  backed up, with revision-based conflict detection so an open tab can't
+  overwrite a skill's changes), and `POST /upload-attachment` for resume PDFs.
+  `contacts_store.py` is the stdlib CLI the skills use; it writes through the
+  server when it's running.
+- `outreach-config.json` holds pacing and note length. Request and note limits
+  are optional (`null` = off); LinkedIn's own limits still apply and stop a send.
+- Tracker fixes: the URL remembers Jobs/People and Board/Table so a refresh keeps
+  your screen; the app's own files are revalidated on every load, so an update
+  never leaves a stale script running; backups rotate per file (`data-*`,
+  `contacts-*`); the footer says "Loaded from" until something is actually saved,
+  and "1 application" is singular.
+- `install.py` copies the new app files and the templates and creates `Referral/`;
+  setup offers referral outreach as an optional fifth automation.
+
 ## 0.2.0 — 2026-07-13
 - **Application docs are now text-based PDF, organized per company.** `generate-docs`
   writes each role's résumé and cover letter as a text-selectable PDF (plus an

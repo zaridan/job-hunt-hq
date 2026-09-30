@@ -109,11 +109,13 @@ footer{color:var(--muted);font-size:12px;margin-top:22px;display:flex;gap:14px;f
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .fitb{font-weight:600}.fit-hi{color:#2e8b57}.fit-mid{color:#c79a3a}.fit-lo{color:#9aa7ac}
 </style>
+<link rel="stylesheet" href="people.css">
 </head>
 <body>
 <header>
   <div><h1>Job Hunt — Tracker</h1><div class="sub">Local-first · link a data file for durable, portable storage</div></div>
   <div style="display:flex;gap:10px;align-items:center">
+    <div class="seg"><button id="dj" class="on" onclick="setDataset('jobs')">Jobs</button><button id="dp" onclick="setDataset('people')">People</button></div>
     <div class="seg"><button id="vb" class="on" onclick="setView('board')">Board</button><button id="vt" onclick="setView('table')">Table</button></div>
   </div>
 </header>
@@ -122,14 +124,14 @@ footer{color:var(--muted);font-size:12px;margin-top:22px;display:flex;gap:14px;f
   <div class="controls">
     <input type="search" id="q" placeholder="Search company, role, notes…" oninput="render()">
     <select id="sf" onchange="render()"><option value="">All statuses</option></select>
-    <label class="chk"><input type="checkbox" id="sc" onchange="render()"> Hide closed &amp; won't-apply</label>
+    <label class="chk" id="lblHide"><input type="checkbox" id="sc" onchange="render()"> Hide closed &amp; won't-apply</label>
     <span class="colwrap" id="colwrap"><button class="btn" id="btnCols" type="button">Columns ▾</button><div class="colmenu" id="colmenu"></div></span>
     <span id="filestat" class="filechip">Browser storage</span>
     <span class="spacer"></span>
-    <button class="btn primary" onclick="openEdit(null)">+ Add</button>
-    <button class="btn" onclick="exportJSON()">Export</button>
-    <button class="btn" onclick="document.getElementById('imp').click()">Import</button>
-    <button class="btn" onclick="exportCSV()">CSV</button>
+    <button class="btn primary" id="btnAdd" onclick="addClicked()">+ Add</button>
+    <button class="btn" id="btnExport" onclick="exportJSON()">Export</button>
+    <button class="btn" id="btnImport" onclick="document.getElementById('imp').click()">Import</button>
+    <button class="btn" id="btnCsv" onclick="exportCSV()">CSV</button>
     <button class="btn" id="btnOpen" onclick="linkOpen()" style="display:none">Open file</button>
     <button class="btn" id="btnSaveAs" onclick="linkNew()" style="display:none">Save As file</button>
     <button class="btn" id="btnUnlink" onclick="unlinkFile()" style="display:none">Unlink</button>
@@ -138,6 +140,7 @@ footer{color:var(--muted);font-size:12px;margin-top:22px;display:flex;gap:14px;f
   </div>
   <div id="board" class="board"></div>
   <div id="table" class="hidden"></div>
+  <div id="people" class="hidden"></div>
   <footer id="foot"></footer>
 </div>
 
@@ -260,7 +263,7 @@ function stampApplied(a){ // when a card lands in Applied, stamp the date + a 7-
 }
 
 let state={apps:[]};
-let view='board', sortKey=null, sortDir=1, editingId=null;
+let view='board', dataset='jobs', sortKey=null, sortDir=1, editingId=null;
 let collapsedCols=new Set(), hiddenCols=new Set();
 function loadColPrefs(){
   try{collapsedCols=new Set(JSON.parse(localStorage.getItem('jobhunt_collapsed_cols')||'[]'));}catch(e){collapsedCols=new Set();}
@@ -290,11 +293,13 @@ function load(){
   state.apps.forEach(a=>{if(!a.id)a.id=uid();});
 }
 function cacheLocal(){try{localStorage.setItem(KEY,JSON.stringify(state.apps));}catch(e){}}
-function save(){cacheLocal();stamp();if(serverMode){persistServer();}else{persistFile();}}
+let jobsSavedAt=null; // shown in the footer; only a real save updates it
+function save(){cacheLocal();jobsSavedAt=new Date();stamp();if(serverMode){persistServer();}else{persistFile();}}
 function stamp(){const f=document.getElementById('foot');const n=state.apps.length;
-  const where=serverMode?'Saved to data.json':usingFile&&fileHandle?('Saved to '+fileHandle.name):'Saved in this browser';
+  const target=serverMode?'data.json':usingFile&&fileHandle?fileHandle.name:'this browser';
+  const where=jobsSavedAt?`Saved to ${target} · ${jobsSavedAt.toLocaleString()}`:`Loaded from ${target}`;
   const tip=serverMode?'Local server owns the file · rolling backups in backups/.':usingFile?'Backed by a file on disk.':'Link a file or Export to back up / move devices.';
-  f.innerHTML=`<span>${n} applications</span><span>${where} · ${new Date().toLocaleString()}</span><span>${tip}</span>`;}
+  f.innerHTML=`<span>${n} application${n===1?'':'s'}</span><span>${where}</span><span>${tip}</span>`;}
 
 /* ---------- Local server sync (server.py) ----------
    When the app is served by server.py, the server owns data.json:
@@ -392,10 +397,28 @@ function pill(s){const c=PC[s]||'#9aa7ac';return `<span class="pill" style="back
 function stageOf(s){for(const st of STAGES){if(st.match.includes(s))return st.key;}return 'Screening';}
 function dueClass(d){return d&&d<=today?'due':'';}
 
-function setView(v){view=v;document.getElementById('vb').classList.toggle('on',v==='board');document.getElementById('vt').classList.toggle('on',v==='table');
-  document.getElementById('board').classList.toggle('hidden',v!=='board');document.getElementById('table').classList.toggle('hidden',v!=='table');
-  const cw=document.getElementById('colwrap');if(cw){cw.style.display=v==='board'?'':'none';if(v!=='board')document.getElementById('colmenu').classList.remove('show');}
-  render();}
+// Two independent switches: which data (Jobs | People) and which layout (Board | Table).
+function applyChrome(){const P=dataset==='people';
+  document.getElementById('dj').classList.toggle('on',!P);document.getElementById('dp').classList.toggle('on',P);
+  document.getElementById('vb').classList.toggle('on',view==='board');document.getElementById('vt').classList.toggle('on',view==='table');
+  document.getElementById('board').classList.toggle('hidden',P||view!=='board');document.getElementById('table').classList.toggle('hidden',P||view!=='table');document.getElementById('people').classList.toggle('hidden',!P);
+  const showCols=!P&&view==='board';const cw=document.getElementById('colwrap');if(cw){cw.style.display=showCols?'':'none';if(!showCols)document.getElementById('colmenu').classList.remove('show');}
+  // Job-only controls act on data.json, so they're hidden for People (which has its own stat cards).
+  ['kpis','sf','lblHide','btnExport','btnImport','btnCsv'].forEach(id=>{document.getElementById(id).style.display=P?'none':'';});
+  document.getElementById('btnAdd').textContent=P?'+ Add person':'+ Add';
+  document.getElementById('q').placeholder=P?'Search people…':'Search company, role, notes…';
+  if(!P){stamp();updateFileStatus();}
+  writeHash();}
+// The URL remembers Jobs|People and Board|Table (#jobs, #people, #people/table…),
+// so a refresh, bookmark or new tab opens the same screen.
+function readHash(){const [d,v]=location.hash.slice(1).split('/');dataset=d==='people'?'people':'jobs';view=v==='table'?'table':'board';}
+function writeHash(){const h='#'+dataset+(view==='table'?'/table':'');if(location.hash!==h)history.replaceState(null,'',h);}
+window.addEventListener('hashchange',()=>{const d=dataset;readHash();const nd=dataset;dataset=d;if(nd!==d)setDataset(nd);else{applyChrome();render();}});
+function setView(v){view=v;applyChrome();render();}
+// Jobs and People keep separate search text, so a jobs search doesn't silently filter people.
+const searchByDataset={};
+function setDataset(d){const q=document.getElementById('q');searchByDataset[dataset]=q.value;dataset=d;q.value=searchByDataset[d]||'';applyChrome();render();}
+function addClicked(){if(dataset==='people'&&window.People)People.openAdd();else openEdit(null);}
 
 function initFilters(){const sel=document.getElementById('sf');const cur=sel.value;
   sel.innerHTML='<option value="">All statuses</option>'+ALL_STATUSES.map(s=>`<option ${s===cur?'selected':''}>${s}</option>`).join('');}
@@ -427,7 +450,7 @@ function card(a){
     <summary>
       <div class="co">${esc(a.company)}</div>
       <div class="ro">${esc(a.role)}</div>
-      <div class="meta">${a.dateAdded?`<span class="added" title="Added ${esc(ageStr(a.dateAdded))}">＋ ${esc(a.dateAdded)}</span>`:''}${a.salary?`<span>${esc(a.salary)}</span>`:''}${a.arrangement?`<span>${esc(a.arrangement)}</span>`:''}${a.nextFollowup?`<span class="${dueClass(a.nextFollowup)}">⏰ ${esc(a.nextFollowup)}</span>`:''}${a.fitScore?`<span class="fitb ${fitCls(a.fitScore)}">◎ ${esc(a.fitScore)}</span>`:''}${a.excitement?`<span>★ ${esc(a.excitement)}</span>`:''}${docBadge(a)}</div>
+      <div class="meta">${a.dateAdded?`<span class="added" title="Added ${esc(ageStr(a.dateAdded))}">＋ ${esc(a.dateAdded)}</span>`:''}${a.salary?`<span>${esc(a.salary)}</span>`:''}${a.arrangement?`<span>${esc(a.arrangement)}</span>`:''}${a.nextFollowup?`<span class="${dueClass(a.nextFollowup)}">⏰ ${esc(a.nextFollowup)}</span>`:''}${a.fitScore?`<span class="fitb ${fitCls(a.fitScore)}">◎ ${esc(a.fitScore)}</span>`:''}${a.excitement?`<span>★ ${esc(a.excitement)}</span>`:''}${docBadge(a)}${window.People?People.badge(a):''}</div>
     </summary>
     <div class="body">
       <p>${pill(a.status)}${a.dateApplied?` · applied ${esc(a.dateApplied)}`:''}${a.source?` · ${esc(a.source)}`:''}</p>
@@ -486,7 +509,8 @@ function sortBy(k){if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1;}render()
 function render(){
   const list=visible(state.apps);
   kpis(state.apps);
-  if(view==='board')renderBoard(list); else renderTable(state.apps);
+  if(dataset==='people'){if(window.People)People.view(view);}
+  else if(view==='board')renderBoard(list); else renderTable(state.apps);
 }
 
 /* ---------- documents (written by Claude, surfaced here) ---------- */
@@ -640,14 +664,19 @@ fillStatusSelect();
 load();
 loadColPrefs();
 initFilters();
+readHash();
+applyChrome();
 stamp();
 render();
 document.getElementById('btnCols').addEventListener('click',e=>{e.stopPropagation();const m=document.getElementById('colmenu');const open=!m.classList.contains('show');if(open)buildColMenu();m.classList.toggle('show',open);});
 document.addEventListener('click',e=>{if(!e.target.closest('#colwrap'))document.getElementById('colmenu').classList.remove('show');});
-initServerSync().then(ok=>{
+window.syncReady=initServerSync().then(ok=>{
   if(ok){initFilters();stamp();render();updateFileStatus();}
   else{initFileSync();}
+  return ok;
 });
 </script>
+<script src="people-core.js"></script>
+<script src="people.js"></script>
 </body>
 </html>
