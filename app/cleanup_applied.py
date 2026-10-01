@@ -16,10 +16,14 @@ this script's own location, so it works regardless of absolute path.
 """
 import json
 import shutil
+import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent            # <root>/Job Tracker App/.. = <root>
-DATA = ROOT / "Job Tracker App" / "data.json"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import storage  # noqa: E402  same folder: knows where the data folder is
+
+ROOT = Path(storage.ROOT_DIR)                            # <root>/Job Tracker App/.. = <root>
+DATA = Path(storage.DATA_FILE)                           # <root>/Data/data.json (older installs: the app folder)
 APPS_DIR = ROOT / "Applications"
 ARCHIVE_DIR = APPS_DIR / "Archive"
 ARCHIVE_STATUSES = {"Applied", "Phone Screen", "Interviewing", "Offer"}

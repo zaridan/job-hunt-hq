@@ -4,7 +4,7 @@ Shared by the `linkedin-job-search`, `people-finder` and `referral-outreach` ski
 optional outreach-prep scheduled task. Read this before doing anything on LinkedIn.
 
 `<root>` is the user's job-hunt folder (it holds `Job-Thesis.md` and `Job Tracker App/`). If it
-isn't known, ask, or find it with `find ~ -maxdepth 4 -name data.json -path '*Job Tracker App*'`.
+isn't known, ask, or find it with `find ~ -maxdepth 4 -name Job-Thesis.md`. The tracker's data lives in `<root>/Data/` (installs from before v0.3.0: inside `Job Tracker App/`).
 Run every command below from `<root>`. Below, `store` means `python3 "Job Tracker App/contacts_store.py"`.
 
 ## "Send outreach"
@@ -43,7 +43,7 @@ Neither skill's Send section covers the other's list. Running just one of them (
     - Setting `attachmentSource` resets `attachment` (to `baseResumePath` for `base`) and clears `askApproved`.
   - `quota`: prints requests today and this week, and notes sent and selected, with what remains under each limit (`null` when that limit is off).
   - It writes through the tracker server when it's running (so an open People tab stays in sync), and straight to the file otherwise.
-- **Tracker jobs** (`Job Tracker App/data.json`):
+- **Tracker jobs** (`Data/data.json`, or `Job Tracker App/data.json` on older installs):
   - If `curl -s -m 2 http://localhost:8787/health` returns ok, GET `http://localhost:8787/data.json`, change the array, and POST the full array to `/save` with `Content-Type: application/json`.
   - Otherwise, edit the file directly.
   - Either way, keep every existing entry and field.
@@ -53,7 +53,7 @@ Neither skill's Send section covers the other's list. Running just one of them (
     git -C "Job Tracker App" add -A .
     # If the whole job-hunt folder is one repo, also commit what the skills wrote around the app.
     if [ "$(git -C "Job Tracker App" rev-parse --show-toplevel)" = "$(pwd -P)" ]; then
-      for p in "Job Listings" Applications Resume Referral; do [ -e "$p" ] && git add -A -- "$p"; done
+      for p in Data "Job Listings" Applications Resume Referral; do [ -e "$p" ] && git add -A -- "$p"; done
       git add -- New-Openings-*.md 2>/dev/null || true
     fi
     git -C "Job Tracker App" diff --cached --quiet || git -C "Job Tracker App" commit -m "<skill>: <one-line summary>"

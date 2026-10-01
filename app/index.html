@@ -298,7 +298,7 @@ function save(){cacheLocal();jobsSavedAt=new Date();stamp();if(serverMode){persi
 function stamp(){const f=document.getElementById('foot');const n=state.apps.length;
   const target=serverMode?'data.json':usingFile&&fileHandle?fileHandle.name:'this browser';
   const where=jobsSavedAt?`Saved to ${target} · ${jobsSavedAt.toLocaleString()}`:`Loaded from ${target}`;
-  const tip=serverMode?'Local server owns the file · rolling backups in backups/.':usingFile?'Backed by a file on disk.':'Link a file or Export to back up / move devices.';
+  const tip=serverMode?'Server owns the file · rolling backups in Data/backups/.':usingFile?'Backed by a file on disk.':'Link a file or Export to back up / move devices.';
   f.innerHTML=`<span>${n} application${n===1?'':'s'}</span><span>${where}</span><span>${tip}</span>`;}
 
 /* ---------- Local server sync (server.py) ----------
@@ -306,13 +306,14 @@ function stamp(){const f=document.getElementById('foot');const n=state.apps.leng
    reads on load, atomic writes on every change, rolling backups.
    Detected via /health; when absent (file://, GitHub Pages) the app
    falls back to the File System Access API / localStorage below. */
-let serverMode=false, srvWriting=false, srvPending=false;
+let serverMode=false, srvWriting=false, srvPending=false, dataRevision='';
 async function initServerSync(){
   try{
     const h=await fetch('health',{cache:'no-store'});if(!h.ok)return false;
     const hj=await h.json();if(!hj.ok)return false;
     const r=await fetch('data.json',{cache:'no-store'});if(!r.ok)return false;
     const data=await r.json();if(!Array.isArray(data))return false;
+    dataRevision=r.headers.get('X-Data-Revision')||'';
     serverMode=true;state.apps=data;state.apps.forEach(a=>{if(!a.id)a.id=uid();});
     cacheLocal();return true;
   }catch(e){return false;}
@@ -322,14 +323,41 @@ async function persistServer(){
   if(srvWriting){srvPending=true;return;}
   srvWriting=true;
   try{
-    const r=await fetch('save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(state.apps)});
+    const r=await fetch('save',{method:'POST',headers:{'Content-Type':'application/json','X-Base-Revision':dataRevision},body:JSON.stringify(state.apps)});
+    const j=await r.json().catch(()=>({}));
+    if(r.status===409){
+      // Someone else saved first (a Claude run, another tab, or the copy on GitHub).
+      srvWriting=false;srvPending=false;
+      await reloadFromServer();
+      toast('Jobs changed elsewhere (a Claude run or another device?) — reloaded the latest. Please redo your last change.');
+      return;
+    }
     if(!r.ok)throw new Error('HTTP '+r.status);
+    if(j.revision)dataRevision=j.revision;
+    if(j.syncWarning)toast('⚠ Saved here, but not yet to GitHub — it will retry on the next save.');
   }catch(e){
     toast('⚠ Save to data.json failed — edits are cached in this browser only. Is the tracker server running?');
   }
   srvWriting=false;
   if(srvPending){srvPending=false;persistServer();}
 }
+/* Re-read data.json if it changed since we loaded it — on a 409, and when the
+   tab comes back into view, so a tab left open picks up a scrub or reply check
+   that ran meanwhile (and, on a hosted copy, saves from other devices). */
+async function reloadFromServer(){
+  if(!serverMode)return;
+  try{
+    const r=await fetch('data.json',{cache:'no-store'});if(!r.ok)return;
+    const rev=r.headers.get('X-Data-Revision')||'';
+    if(rev&&rev===dataRevision)return;
+    const data=await r.json();if(!Array.isArray(data))return;
+    dataRevision=rev;state.apps=data;state.apps.forEach(a=>{if(!a.id)a.id=uid();});
+    cacheLocal();initFilters();render();
+  }catch(e){}
+}
+function maybeReloadJobs(){if(serverMode&&!srvWriting&&!srvPending&&!editingId)reloadFromServer();}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')maybeReloadJobs();});
+window.addEventListener('focus',maybeReloadJobs);
 function openExternal(url){
   if(serverMode){fetch('open?url='+encodeURIComponent(url)).catch(()=>window.open(url,'_blank'));}
   else{window.open(url,'_blank');}

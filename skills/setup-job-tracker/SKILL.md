@@ -16,6 +16,7 @@ If a folder is already connected to this session/project, DEFAULT to it: confirm
 ├── START-HERE.md
 ├── Job-Thesis.md
 ├── Job Tracker App/          (the app — copied in Step 2)
+├── Data/                     (the tracker's data: data.json, contacts.json, backups — kept apart from the app)
 ├── Applications/             (per-company folders of tailored docs, added as you apply)
 ├── Resume/
 │   └── Master-Resume.md
@@ -37,11 +38,11 @@ The entire deterministic install is one command. Determine the user's host OS (m
 JOBHUNT_HOST_OS=<mac|windows|linux> python3 "${CLAUDE_PLUGIN_ROOT}/app/install.py" --target "<root>"
 ```
 
-The script creates the folder structure, copies the app files (including the People tab and `outreach-config.json`) and the referral message templates, creates an empty data.json, and drops a launcher-maker in `<root>`. It prints a JSON summary — read it and confirm `created` lists the app files (or `skipped` on re-runs) and `launcher` is set. Do not create folders, copy files, or improvise placeholder files (like .gitkeep) yourself; the script is the install.
+The script creates the folder structure, copies the app files (including the People tab and `outreach-config.json`) and the referral message templates, creates an empty `Data/data.json`, and drops a launcher-maker in `<root>`. Re-running it over an older install (data.json inside `Job Tracker App/`) leaves that data where it is. It prints a JSON summary — read it and confirm `created` lists the app files (or `skipped` on re-runs) and `launcher` is set. Do not create folders, copy files, or improvise placeholder files (like .gitkeep) yourself; the script is the install.
 
 Then activate the one-click launcher BY DEFAULT: on macOS, if host-control tools are available, run the generated "Make Job Tracker Launcher.command" for the user; otherwise tell them (one plain sentence) to double-click it once in their folder. Windows/Linux: the script already dropped the shortcut. The launcher icon is how the user opens the tracker from now on — never by terminal.
 
-Git is OPTIONAL — if available, init a repo in `Job Tracker App/` only and commit; if not, skip silently (the server keeps rolling backups regardless).
+Git is OPTIONAL — if available, init a repo at `<root>` (so it versions both `Data/` and the documents; `Data/.gitignore` already keeps backups out) and commit; if not, skip silently (the server keeps rolling backups regardless).
 
 Port note: the tracker server uses port 8787; if another instance already owns it on this machine, bake `--port <free port>` into the launcher shim.
 

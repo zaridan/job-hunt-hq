@@ -38,7 +38,7 @@ var People = (function () {
     var n = contacts.length;
     document.getElementById('foot').innerHTML = '<span>' + n + (n === 1 ? ' person' : ' people') + '</span>' +
       '<span>' + esc(lastSync || (serverMode ? 'contacts.json not loaded yet' : 'Only in this browser')) + '</span>' +
-      '<span>' + (serverMode ? 'Local server owns contacts.json · rolling backups in backups/.'
+      '<span>' + (serverMode ? 'Server owns contacts.json · rolling backups in Data/backups/.'
                              : 'Start the tracker server so changes reach contacts.json.') + '</span>';
   }
 
@@ -93,6 +93,7 @@ var People = (function () {
       if (j.revision) revision = j.revision;
       saveFailed = false;
       lastSync = 'Saved to contacts.json · ' + clock();
+      if (j.syncWarning) toast('⚠ Saved here, but not yet to GitHub — it will retry on the next save.');
     } catch (e) {
       saveFailed = true;
       toast('⚠ Could not save contacts: ' + e.message);

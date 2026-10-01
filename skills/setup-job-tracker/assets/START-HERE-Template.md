@@ -23,8 +23,9 @@ shortcut.)
 ## The files
 - `Job-Thesis.md` — what "a fit" means; edit anytime, automations follow it.
 - `Resume/Master-Resume.md` — canonical resume; tailored copies derive from it.
-- `Job Tracker App/data.json` — the single source of truth for the board.
-  Git-versioned; rolling backups in `Job Tracker App/backups/`.
+- `Data/data.json` — the single source of truth for the board (and
+  `Data/contacts.json` for the People tab), kept apart from the app.
+  Git-versioned; rolling backups in `Data/backups/`.
 
 ## Referral outreach (optional — keep this section only if it's set up)
 

@@ -13,7 +13,7 @@ applies. See "What it doesn't do" below.
 
 **The tracker app** (`app/`) — a single-page kanban board (Screening →
 To Apply → Applied → Phone Screen → Interviewing → Offer) backed by one
-`data.json` file on your disk. A tiny stdlib-Python local server gives it
+`Data/data.json` file on your disk (kept apart from the app). A tiny stdlib-Python local server gives it
 atomic saves, rolling backups, and opens job links in your default browser.
 No accounts, no cloud, no build step. Works standalone even without Claude.
 

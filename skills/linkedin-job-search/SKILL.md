@@ -45,7 +45,7 @@ Don't score up roles that oversell the user; the reality check wins. If the post
 ## 4. Save and add (roles scoring 50+)
 
 1. Save the description to `Job Listings/<Company> - <Role>.md`, replacing `/` and `:` with `-`. Put the posting URL and today's date on the first two lines.
-2. Append this entry to `Job Tracker App/data.json`, using the write path in Outreach-Rules.md:
+2. Append this entry to the tracker's `data.json` (`Data/data.json`; older installs: `Job Tracker App/data.json`), using the write path in Outreach-Rules.md:
 
    ```json
    {"id": "app-<base36 of Date.now()><4 random base36 chars>", "company": "", "role": "",

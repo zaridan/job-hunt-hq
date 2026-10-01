@@ -15,7 +15,7 @@ Read `${CLAUDE_PLUGIN_ROOT}/skills/referral-outreach/Outreach-Rules.md` first; i
 ## Research (read-only)
 
 1. **Know the user's network.** From `Resume/Master-Resume.md`, list every employer (with dates) and every school (with dates). These drive the searches and the scoring below.
-2. **Targets:** companies with at least one `To Apply` card in `Job Tracker App/data.json`.
+2. **Targets:** companies with at least one `To Apply` card in the tracker's `data.json` (`Data/data.json`; older installs: `Job Tracker App/data.json`).
    - For each, run `store list --company "<Company>"`.
    - Skip companies that already have `contactsPerCompany` contacts not in `Skipped`.
 3. **Budget:** open at most `maxProfileViewsPerRun` profile pages in this run, across all companies and the acceptance check. Count every profile page you open.

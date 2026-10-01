@@ -2,14 +2,24 @@
 """
 Job Tracker local server — the tiny backend that makes the tracker rock solid.
 
-Serves the app and owns all reads/writes of data.json. No dependencies
-(Python 3 stdlib only), localhost-only, single instance.
+Serves the app and owns all reads/writes of the tracker's data, which lives
+in the Data folder next to the app (see storage.py for where exactly, and for
+the optional GitHub sync). No dependencies (Python 3 stdlib only), single
+instance. Localhost-only by default; to serve
+it elsewhere (e.g. Render), pass --host 0.0.0.0 (or set HOST) together with
+TRACKER_PASSWORD, which turns on a browser login (HTTP Basic auth, any
+username). The server refuses to listen beyond localhost without a password.
 
 Endpoints:
   GET  /            -> index.html (and any static file in this folder)
-  GET  /data.json   -> current data, never cached
+  GET  /data.json   -> current data, never cached; response header
+                       X-Data-Revision is a content hash (see /save)
   POST /save        -> body = JSON array of applications; written atomically,
-                       previous version kept in backups/ (last 20 retained)
+                       previous version kept in backups/ (last 20 retained).
+                       An X-Base-Revision request header, if present, must
+                       match the current X-Data-Revision or the save is
+                       rejected with 409; on success the body's "revision"
+                       is the new X-Data-Revision.
   GET  /contacts.json -> referral contacts ([] if none yet), never cached;
                        response header X-Contacts-Revision is a content hash
                        for optimistic concurrency (see /save-contacts)
@@ -42,80 +52,44 @@ If the port is already in use, an instance is assumed to be running and we
 exit 0 — safe for a launcher to call unconditionally.
 """
 import argparse
-import hashlib
+import base64
+import hmac
 import json
 import os
 import re
 import socket
 import subprocess
 import sys
-import tempfile
 import threading
-import time
 import webbrowser
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
 
-APP_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(APP_DIR, "data.json")
-BACKUP_DIR = os.path.join(APP_DIR, "backups")
-KEEP_BACKUPS = 20
+# storage.py sits next to this file. Make it importable however we're started
+# (python server.py, tracker.py via runpy, or loaded by path), since only a
+# directly-run script gets its folder on the import path automatically.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import storage  # noqa: E402  same folder: where the data lives, atomic writes, backups, GitHub sync
+from storage import (APP_DIR, ROOT_DIR, DATA_DIR, DATA_FILE, CONTACTS_FILE, BACKUP_DIR,
+                     atomic_write, atomic_write_bytes, rotate_backup)
+
 VERSION = "1.0.0"
-ROOT_DIR = os.path.dirname(APP_DIR)  # the job-hunt repo root
-CONTACTS_FILE = os.path.join(APP_DIR, "contacts.json")
 CONTACT_STAGES = ("Found", "Queued", "Requested", "Connected", "Asked",
                   "Referred", "Declined", "No response", "Skipped")
 MAX_JSON_BYTES = 20_000_000
 NO_STORE_PATHS = ("/data.json", "/contacts.json", "/outreach-config.json", "/health")
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 UPLOAD_DIR = os.path.join(ROOT_DIR, "Resume", "Uploads")
-# Guards the read-revision/write-contacts sequence in _save_contacts so two
-# concurrent saves (e.g. a browser tab and a skill run) can't both pass the
-# revision check against the same stale value and then both write.
+# Guard each file's read-revision/write sequence so two concurrent saves (e.g.
+# a browser tab and a skill run) can't both pass the revision check against
+# the same stale value and then both write.
 CONTACTS_LOCK = threading.Lock()
-
-
-def rotate_backup(path, prefix):
-    """Copy `path` to backups/<prefix>-<stamp>.json and keep the newest KEEP_BACKUPS per prefix."""
-    if not os.path.exists(path):
-        return
-    os.makedirs(BACKUP_DIR, exist_ok=True)
-    stamp = time.strftime("%Y%m%d-%H%M%S")
-    dest = os.path.join(BACKUP_DIR, f"{prefix}-{stamp}.json")
-    try:
-        with open(path, "rb") as src, open(dest, "wb") as dst:
-            dst.write(src.read())
-    except OSError:
-        return
-    pattern = re.compile(re.escape(prefix) + r"-\d{8}-\d{6}\.json")
-    backups = sorted(f for f in os.listdir(BACKUP_DIR) if pattern.fullmatch(f))
-    for old in backups[:-KEEP_BACKUPS]:
-        try:
-            os.remove(os.path.join(BACKUP_DIR, old))
-        except OSError:
-            pass
-
-
-def atomic_write_bytes(path, data):
-    directory = os.path.dirname(path) or "."
-    basename = os.path.basename(path)
-    fd, tmp = tempfile.mkstemp(dir=directory, prefix=basename + ".", suffix=".tmp")
-    try:
-        with os.fdopen(fd, "wb") as f:
-            f.write(data)
-            f.flush()
-            os.fsync(f.fileno())
-        os.replace(tmp, path)
-    except BaseException:
-        try:
-            os.remove(tmp)
-        except OSError:
-            pass
-        raise
-
-
-def atomic_write(path, text):
-    atomic_write_bytes(path, text.encode("utf-8"))
+DATA_LOCK = threading.Lock()
+# Set TRACKER_PASSWORD to require a login on every request except /health
+# (left open for platform health checks). Unset means no login, which is only
+# allowed when listening on localhost (see main()).
+PASSWORD = os.environ.get("TRACKER_PASSWORD", "")
+LOOPBACK_HOSTS = ("127.0.0.1", "localhost", "::1")
 
 
 def normalize_linkedin_url(url):
@@ -157,22 +131,19 @@ def validate_contacts(data):
 
 
 def read_contacts():
-    try:
-        with open(CONTACTS_FILE, encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return []
+    return storage.read_json(CONTACTS_FILE, [])
 
 
 def contacts_revision():
     """SHA-256 hex of contacts.json's current bytes; "" if the file is missing.
     A cheap optimistic-concurrency token so a stale writer (an open People
     tab, a skill run) can detect it's about to overwrite someone else's save."""
-    try:
-        with open(CONTACTS_FILE, "rb") as f:
-            return hashlib.sha256(f.read()).hexdigest()
-    except FileNotFoundError:
-        return ""
+    return storage.file_revision(CONTACTS_FILE)
+
+
+def data_revision():
+    """The same token for data.json (jobs)."""
+    return storage.file_revision(DATA_FILE)
 
 
 def safe_segment(text, fallback):
@@ -188,6 +159,34 @@ class Handler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=APP_DIR, **kwargs)
 
     # ---- helpers -------------------------------------------------------
+    def _authorized(self):
+        """True when no password is set, or the request carries it (any username)."""
+        if not PASSWORD or urlparse(self.path).path == "/health":
+            return True
+        header = self.headers.get("Authorization", "")
+        if not header.startswith("Basic "):
+            return False
+        try:
+            decoded = base64.b64decode(header[6:], validate=True).decode("utf-8")
+        except (ValueError, UnicodeDecodeError):
+            return False
+        supplied = decoded.partition(":")[2]
+        return hmac.compare_digest(supplied.encode("utf-8"), PASSWORD.encode("utf-8"))
+
+    def _require_auth(self):
+        """Send a 401 login challenge and return True if the request isn't authorized."""
+        if self._authorized():
+            return False
+        body = b"Login required"
+        self.send_response(401)
+        self.send_header("WWW-Authenticate", 'Basic realm="Job Tracker", charset="UTF-8"')
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        if self.command != "HEAD":
+            self.wfile.write(body)
+        return True
+
     def _same_origin(self):
         """Best-effort check that the request came from our own page."""
         host = self.headers.get("Host", "")
@@ -203,7 +202,9 @@ class Handler(SimpleHTTPRequestHandler):
         return True  # curl / same-machine tools
 
     def _json(self, code, obj, headers=None):
-        body = json.dumps(obj).encode()
+        return self._raw_json(json.dumps(obj).encode(), headers, code)
+
+    def _raw_json(self, body, headers=None, code=200):
         self.send_response(code)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
@@ -224,12 +225,25 @@ class Handler(SimpleHTTPRequestHandler):
         super().end_headers()
 
     # ---- routes --------------------------------------------------------
+    def do_HEAD(self):
+        if self._require_auth():
+            return
+        return super().do_HEAD()
+
     def do_GET(self):
+        if self._require_auth():
+            return
         parsed = urlparse(self.path)
         if parsed.path == "/health":
             return self._json(200, {"ok": True, "version": VERSION,
-                                    "dataFile": os.path.basename(DATA_FILE)})
+                                    "dataFile": os.path.basename(DATA_FILE),
+                                    "sync": "github" if storage.sync.enabled else "off"})
+        if parsed.path == "/data.json":
+            storage.sync.refresh(DATA_FILE, "data")
+            raw = storage.read_bytes(DATA_FILE)
+            return self._raw_json(b"[]" if raw is None else raw, {"X-Data-Revision": data_revision()})
         if parsed.path == "/contacts.json":
+            storage.sync.refresh(CONTACTS_FILE, "contacts")
             return self._json(200, read_contacts(), {"X-Contacts-Revision": contacts_revision()})
         if parsed.path == "/open":
             return self._open_url(parsed)
@@ -237,8 +251,8 @@ class Handler(SimpleHTTPRequestHandler):
             return self._reveal(parsed)
         if parsed.path == "/claude":
             return self._open_claude()
-        # never serve git internals, backups, or ourselves
-        if parsed.path.startswith(("/.git", "/backups", "/server.py")):
+        # never serve git internals, backups, or the app's own code
+        if parsed.path.startswith(("/.git", "/backups")) or parsed.path.endswith(".py"):
             return self._json(404, {"ok": False, "error": "not found"})
         return super().do_GET()
 
@@ -351,9 +365,18 @@ class Handler(SimpleHTTPRequestHandler):
         os.makedirs(os.path.dirname(target), exist_ok=True)
         atomic_write_bytes(target, body)
         rel = os.path.relpath(target, os.path.realpath(ROOT_DIR)).replace(os.sep, "/")
-        return self._json(200, {"ok": True, "path": rel})
+        result = {"ok": True, "path": rel}
+        try:
+            storage.sync.push(target, f"tracker: upload {rel}", overwrite=True)
+        except storage.SyncPending as e:
+            result["syncWarning"] = str(e)
+        return self._json(200, result)
 
     def do_POST(self):
+        if self._require_auth():
+            length = int(self.headers.get("Content-Length", 0) or 0)
+            self._drain(length)
+            return
         routes = {"/save": self._save_apps, "/save-contacts": self._save_contacts, "/upload-attachment": self._upload_attachment}
         handler = routes.get(urlparse(self.path).path)
         if handler is None:
@@ -380,29 +403,44 @@ class Handler(SimpleHTTPRequestHandler):
                 raise ValueError("every application must be an object")
         except ValueError as e:
             return self._json(400, {"ok": False, "error": str(e)})
-        rotate_backup(DATA_FILE, "data")
-        atomic_write(DATA_FILE, json.dumps(data, indent=2, ensure_ascii=False))
-        return self._json(200, {"ok": True, "count": len(data)})
+        with DATA_LOCK:
+            return self._save_file(DATA_FILE, "data", data, data_revision, "jobs",
+                                   {"count": len(data)})
+
+    def _save_file(self, path, prefix, data, revision, what, extra):
+        """Write one data file under its lock: refuse a stale X-Base-Revision with
+        409, back up, write atomically, then commit to GitHub if sync is on.
+        Requests without the header are accepted unconditionally (manual tools,
+        curl); a mismatched header means someone else wrote since this client
+        last loaded, so refuse rather than clobber their save."""
+        storage.sync.refresh(path, prefix, max_age=0)  # pick up others' changes first
+        base_revision = self.headers.get("X-Base-Revision")
+        current = revision()
+        if base_revision is not None and base_revision != current:
+            return self._json(409, {"ok": False, "error": f"{what} changed since you loaded them",
+                                    "revision": current})
+        rotate_backup(path, prefix)
+        atomic_write(path, json.dumps(data, indent=2, ensure_ascii=False))
+        result = {"ok": True, **extra}
+        try:
+            storage.sync.push(path, f"tracker: save {storage.sync.repo_path(path)}")
+        except storage.SyncConflict:
+            return self._json(409, {"ok": False, "revision": revision(),
+                                    "error": f"{what} changed on GitHub since you loaded them; "
+                                             "your version is kept in backups"})
+        except storage.SyncPending as e:
+            result["syncWarning"] = str(e)
+        result["revision"] = revision()
+        return self._json(200, result)
 
     def _save_contacts(self):
         try:
             data = validate_contacts(self._read_json_body())
         except ValueError as e:
             return self._json(400, {"ok": False, "error": str(e)})
-        base_revision = self.headers.get("X-Base-Revision")
-        # Requests without the header are accepted unconditionally (manual
-        # tools, curl); a mismatched header means someone else wrote since
-        # this client last loaded, so refuse rather than clobber their save.
         with CONTACTS_LOCK:
-            current_revision = contacts_revision()
-            if base_revision is not None and base_revision != current_revision:
-                return self._json(409, {"ok": False,
-                                        "error": "contacts changed since you loaded them",
-                                        "revision": current_revision})
-            rotate_backup(CONTACTS_FILE, "contacts")
-            atomic_write(CONTACTS_FILE, json.dumps(data, indent=2, ensure_ascii=False))
-            new_revision = contacts_revision()
-        return self._json(200, {"ok": True, "count": len(data), "revision": new_revision})
+            return self._save_file(CONTACTS_FILE, "contacts", data, contacts_revision, "contacts",
+                                   {"count": len(data)})
 
     def log_message(self, fmt, *args):  # quiet: log errors only
         if args and str(args[1] if len(args) > 1 else "").startswith(("4", "5")):
@@ -411,8 +449,15 @@ class Handler(SimpleHTTPRequestHandler):
 
 def main():
     ap = argparse.ArgumentParser(description="Job Tracker local server")
-    ap.add_argument("--port", type=int, default=8787)
+    ap.add_argument("--port", type=int, default=int(os.environ.get("PORT", 8787)))
+    ap.add_argument("--host", default=os.environ.get("HOST", "127.0.0.1"))
     args = ap.parse_args()
+
+    if args.host not in LOOPBACK_HOSTS and not PASSWORD:
+        print(f"Refusing to listen on {args.host} without a password: anyone who can reach it "
+              "could read and change your data. Set TRACKER_PASSWORD, or use the default "
+              "host (127.0.0.1).", file=sys.stderr)
+        return 1
 
     # single instance: if the port is taken, assume we're already running
     probe = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -422,8 +467,12 @@ def main():
         return 0
     probe.close()
 
-    httpd = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
-    print(f"Job Tracker serving on http://localhost:{args.port}  (Ctrl-C to stop)")
+    print(f"Data folder: {DATA_DIR}", flush=True)
+    storage.sync.startup([(DATA_FILE, "data"), (CONTACTS_FILE, "contacts")])
+    httpd = ThreadingHTTPServer((args.host, args.port), Handler)
+    where = "localhost" if args.host in LOOPBACK_HOSTS else args.host
+    login = " · login required" if PASSWORD else ""
+    print(f"Job Tracker serving on http://{where}:{args.port}{login}  (Ctrl-C to stop)", flush=True)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

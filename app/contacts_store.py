@@ -20,6 +20,7 @@ silently overwriting someone else's write.
 Env: JOBTRACKER_PORT (default 8787), OUTREACH_TODAY (YYYY-MM-DD, tests only).
 """
 import argparse
+import base64
 import json
 import os
 import random
@@ -61,6 +62,15 @@ def load_config():
     return cfg
 
 
+def _auth_headers():
+    """Login for a tracker server started with TRACKER_PASSWORD (none needed otherwise)."""
+    password = os.environ.get("TRACKER_PASSWORD", "")
+    if not password:
+        return {}
+    token = base64.b64encode(f"cli:{password}".encode("utf-8")).decode("ascii")
+    return {"Authorization": "Basic " + token}
+
+
 def server_up():
     try:
         with urllib.request.urlopen(BASE_URL + "/health", timeout=2) as r:
@@ -74,7 +84,8 @@ def load_contacts():
     pass back to save_contacts: the server's X-Contacts-Revision response
     header in server mode, or a hash of the file in file mode."""
     if server_up():
-        with urllib.request.urlopen(BASE_URL + "/contacts.json", timeout=5) as r:
+        req = urllib.request.Request(BASE_URL + "/contacts.json", headers=_auth_headers())
+        with urllib.request.urlopen(req, timeout=5) as r:
             data = json.load(r)
             revision = r.headers.get("X-Contacts-Revision", "")
         return data, revision
@@ -90,7 +101,8 @@ def save_contacts(contacts, base_revision):
         req = urllib.request.Request(BASE_URL + "/save-contacts", data=body.encode("utf-8"),
                                      method="POST",
                                      headers={"Content-Type": "application/json",
-                                              "X-Base-Revision": base_revision})
+                                              "X-Base-Revision": base_revision,
+                                              **_auth_headers()})
         try:
             with urllib.request.urlopen(req, timeout=10) as r:
                 json.load(r)

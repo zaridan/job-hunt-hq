@@ -11,10 +11,12 @@ file the user may have edited (existing files are left untouched).
 
 Does, in order:
  1. Creates the folder structure (Applications, Resume, Cover Letters,
-    Company Research, Job Listings, Referral, Job Tracker App).
+    Company Research, Job Listings, Referral, Job Tracker App, Data).
  2. Copies the app files (this script's siblings) into Job Tracker App/,
     and the referral message templates into Referral/Templates/.
- 3. Creates data.json ([]) if absent; marks launch.sh executable.
+ 3. Creates Data/data.json ([]) if absent — the data lives in Data/, apart
+    from the app. An install from before Data/ existed (data.json inside
+    Job Tracker App/) is left exactly as it is. Marks launch.sh executable.
  4. Generates a double-clickable launcher-maker:
       macOS  -> "Make Job Tracker Launcher.command" (builds an /Applications
                 app bundle, ad-hoc codesigns it, then deletes itself)
@@ -33,7 +35,9 @@ APP_FILES = ["index.html", "server.py", "launch.py", "launch.sh",
              "cleanup_applied.py", "README.md", ".gitignore",
              # People tab + referral outreach
              "people.css", "people-core.js", "people.js",
-             "contacts_store.py", "outreach-config.json"]
+             "contacts_store.py", "outreach-config.json",
+             # where the data lives (Data/), backups, optional GitHub sync
+             "storage.py"]
 SUBDIRS = ["Job Tracker App", "Applications", "Resume", "Cover Letters",
            "Company Research", "Job Listings", "Referral"]
 # Referral message templates ship with the referral-outreach skill; the user
@@ -123,13 +127,21 @@ def main():
                 shutil.copy2(os.path.join(tsrc, f), os.path.join(tdest, f))
                 result["created"].append(rel)
 
-    data = os.path.join(appdir, "data.json")
-    if not os.path.exists(data):
-        with open(data, "w", encoding="utf-8") as fh:
-            fh.write("[]")
-        result["created"].append("data.json")
+    legacy = os.path.join(appdir, "data.json")
+    if os.path.exists(legacy):
+        # Installed before Data/ existed: keep using the data where it is.
+        result["skipped"].append("Job Tracker App/data.json (data stays in the app folder)")
     else:
-        result["skipped"].append("data.json")
+        datadir = os.path.join(root, "Data")
+        os.makedirs(datadir, exist_ok=True)
+        for name, text in (("data.json", "[]"), (".gitignore", "backups/\n")):
+            path = os.path.join(datadir, name)
+            if os.path.exists(path):
+                result["skipped"].append("Data/" + name)
+            else:
+                with open(path, "w", encoding="utf-8") as fh:
+                    fh.write(text)
+                result["created"].append("Data/" + name)
 
     sh = os.path.join(appdir, "launch.sh")
     if os.path.exists(sh):

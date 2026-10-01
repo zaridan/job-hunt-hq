@@ -30,6 +30,24 @@
   and "1 application" is singular.
 - `install.py` copies the new app files and the templates and creates `Referral/`;
   setup offers referral outreach as an optional fifth automation.
+- **Data lives in `Data/`, apart from the app.** New installs keep `data.json`,
+  `contacts.json` and `backups/` in `<root>/Data/`; `storage.py` owns where the
+  data lives, atomic writes and backups. Installs from before this keep their
+  data in `Job Tracker App/` untouched (re-running `install.py` won't move it),
+  and every skill accepts either location. Setup now suggests one git repo at
+  the job-hunt root so it versions both the data and the documents.
+- **Jobs board conflict checks.** `GET /data.json` sends `X-Data-Revision` and
+  `POST /save` refuses a stale `X-Base-Revision` with 409, so an open tab
+  reloads instead of overwriting a scrub or reply check; tabs also reload the
+  latest when you switch back to them. Skills that POST without the header
+  work as before.
+- **Optional hosting.** `--host`/`HOST` and `PORT` for hosts like Render; a
+  browser login via `TRACKER_PASSWORD` (the server refuses to listen beyond
+  localhost without one); optional GitHub sync (`TRACKER_GITHUB_TOKEN`,
+  `TRACKER_GITHUB_REPO`) for hosts whose disk is wiped on restart: it pulls
+  the latest data on start-up and before serving it and commits every save.
+  Off unless configured — nothing touches the network otherwise.
+- The server no longer serves the app's own `.py` files.
 
 ## 0.2.0 — 2026-07-13
 - **Application docs are now text-based PDF, organized per company.** `generate-docs`
