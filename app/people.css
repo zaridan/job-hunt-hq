@@ -1,0 +1,44 @@
+/* People tab (referral contacts). Uses the tracker's tokens from index.html. */
+/* Stat cards reuse .kpis/.kpi from index.html; a colour edge shows only when a limit is set. */
+#people .kpi.ok{border-left:4px solid #2f8f5b}
+#people .kpi.warn{border-left:4px solid #d08a1e}
+#people .kpi.full{border-left:4px solid #c0392b}
+#people .pwarn{background:#fff7e6;border:1px solid #f0d9a8;border-radius:8px;padding:8px 12px;margin:0 0 12px;font-size:13px}
+#people .pfilter{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:0 0 12px;font-size:13px;display:flex;gap:10px;align-items:center}
+.pboard{display:flex;gap:13px;overflow-x:auto;padding-bottom:8px;align-items:flex-start}
+.pcol{background:#eef1f2;border-radius:12px;padding:10px;min-width:236px;max-width:260px;flex:0 0 auto;max-height:74vh;overflow-y:auto}
+.pcol.over{background:#d7e6ec;outline:2px dashed var(--ink2)}
+.pcol.collapsed{min-width:0}
+.pcol h2{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#54636b;display:flex;gap:6px;align-items:center}
+.pcol h2 .pcolname{flex:1}
+.pcol h2 .ct{background:#dde4e6;border-radius:10px;padding:0 7px;font-size:11px}
+.ptog{border:0;background:none;cursor:pointer;color:inherit;padding:0;font-size:12px}
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:9px;padding:9px 11px}
+.pcard summary{list-style:none;cursor:pointer}
+.pcard summary::-webkit-details-marker{display:none}
+.pname{font-weight:600;font-size:14px}
+.pnote{color:var(--gold)}
+.ptitle{font-size:12px;color:var(--muted);margin-top:2px}
+.pmeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;font-size:11px;align-items:center}
+.prel{background:#e8eef0;color:#3d5560;border-radius:10px;padding:1px 8px}
+.prel.warm{background:#fdecd2;color:#8a5a12;font-weight:600}
+.plike{color:var(--ink2);font-variant-numeric:tabular-nums}
+.pbody{margin-top:8px;font-size:12px;display:flex;flex-direction:column;gap:6px}
+.pbody p{margin:0}
+.pbody .rowbtns{margin-top:0}
+.proles,.pnotes{color:var(--muted)}
+.pbody textarea{width:100%;box-sizing:border-box;min-height:64px;font:inherit;font-size:12px;border:1px solid var(--line);border-radius:6px;padding:6px}
+.pcount{font-size:11px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.pcount.over{color:#c0392b}
+.ptoggle{display:flex;gap:6px;align-items:center}
+.ptoggle em{color:var(--muted)}
+.pattach{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.pfile{font-size:11px}
+.pfile.missing{color:#b0621a}
+.pmove,.pattach select{font-size:12px;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:#fff}
+.pbadge{background:#e6f0f3;color:var(--ink);border-radius:10px;padding:1px 7px;cursor:pointer}
+.pbadge:hover{background:#d2e4ea}
+#people .ptable{overflow-x:auto}
+#people .ptable td{white-space:nowrap}
+#pmodal .field.pcheck{justify-content:flex-end}
+#pmodal .ptoggle{display:flex;gap:6px;align-items:center;text-transform:none;letter-spacing:0;font-size:13px;color:var(--text)}

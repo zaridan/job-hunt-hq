@@ -16,6 +16,7 @@ If a folder is already connected to this session/project, DEFAULT to it: confirm
 ├── START-HERE.md
 ├── Job-Thesis.md
 ├── Job Tracker App/          (the app — copied in Step 2)
+├── Data/                     (the tracker's data: data.json, contacts.json, backups — kept apart from the app)
 ├── Applications/             (per-company folders of tailored docs, added as you apply)
 ├── Resume/
 │   └── Master-Resume.md
@@ -23,7 +24,10 @@ If a folder is already connected to this session/project, DEFAULT to it: confirm
 │   └── Cover-Letter-Template.md
 ├── Company Research/
 │   └── Company-Research-Template.md
-└── Job Listings/
+├── Job Listings/
+└── Referral/                 (optional LinkedIn referral outreach)
+    ├── Templates/            (editable message templates — copied in Step 2)
+    └── Referral-Note.md      (only if the user wants referral outreach — Step 5)
 ```
 
 ## Step 2 — Install the app (run the script — do NOT hand-build)
@@ -34,11 +38,11 @@ The entire deterministic install is one command. Determine the user's host OS (m
 JOBHUNT_HOST_OS=<mac|windows|linux> python3 "${CLAUDE_PLUGIN_ROOT}/app/install.py" --target "<root>"
 ```
 
-The script creates the folder structure, copies the app files, creates an empty data.json, and drops a launcher-maker in `<root>`. It prints a JSON summary — read it and confirm `created` lists the app files (or `skipped` on re-runs) and `launcher` is set. Do not create folders, copy files, or improvise placeholder files (like .gitkeep) yourself; the script is the install.
+The script creates the folder structure, copies the app files (including the People tab and `outreach-config.json`) and the referral message templates, creates an empty `Data/data.json`, and drops a launcher-maker in `<root>`. Re-running it over an older install (data.json inside `Job Tracker App/`) leaves that data where it is. It prints a JSON summary — read it and confirm `created` lists the app files (or `skipped` on re-runs) and `launcher` is set. Do not create folders, copy files, or improvise placeholder files (like .gitkeep) yourself; the script is the install.
 
 Then activate the one-click launcher BY DEFAULT: on macOS, if host-control tools are available, run the generated "Make Job Tracker Launcher.command" for the user; otherwise tell them (one plain sentence) to double-click it once in their folder. Windows/Linux: the script already dropped the shortcut. The launcher icon is how the user opens the tracker from now on — never by terminal.
 
-Git is OPTIONAL — if available, init a repo in `Job Tracker App/` only and commit; if not, skip silently (the server keeps rolling backups regardless).
+Git is OPTIONAL — if available, init a repo at `<root>` (so it versions both `Data/` and the documents; `Data/.gitignore` already keeps backups out) and commit; if not, skip silently (the server keeps rolling backups regardless).
 
 Port note: the tracker server uses port 8787; if another instance already owns it on this machine, bake `--port <free port>` into the launcher shim.
 
@@ -76,6 +80,11 @@ Copy `assets/Cover-Letter-Template.md` and `assets/Company-Research-Template.md`
 2. **Reply monitor** — a scheduled task (suggest 8 AM) running the `reply-monitor` workflow. Requires an ~~email connector; check `${CLAUDE_PLUGIN_ROOT}/CONNECTORS.md`.
 3. **Tailored docs** — either a scheduled sweep or an on-demand artifact: create an ad-hoc scheduled task from the `generate-docs` workflow, then an artifact page whose button triggers it via `runScheduledTask`. The button only works while that ad-hoc task stays registered under the exact ID the artifact calls — to pause doc generation, keep the task **manual-only (ad-hoc); never delete it**, or the button will silently fail. If the artifact is created, explicitly tell the user (in the handoff too): "Pin the Generate Now page in your Cowork sidebar — artifacts are easy to miss unpinned."
 4. **Nightly docs cleanup** — scheduled task (suggest 10 PM) running `Job Tracker App/cleanup_applied.py`.
+5. **LinkedIn referral outreach** — only if the user wants it and has the Claude in Chrome extension signed in to LinkedIn (see `${CLAUDE_PLUGIN_ROOT}/CONNECTORS.md`). Explain it in two sentences: Claude finds people at their To Apply companies who could refer them and drafts connection notes and referral asks, and nothing is ever sent until they approve the exact list in chat. If yes:
+   - Write `<root>/Referral/Referral-Note.md` from `assets/Referral-Note-Template.md`, using only facts from the master resume (confirm the LinkedIn URL and email with the user).
+   - If they have a PDF of their usual resume, put its path (relative to `<root>`, e.g. `Resume/<Name> - Resume.pdf`) in `baseResumePath` in `Job Tracker App/outreach-config.json`.
+   - Offer a daily **outreach prep** scheduled task (suggest 7:30 AM) that runs, read-only: `linkedin-job-search`, then `people-finder` Research and Acceptance check, then `referral-outreach` Draft. Its prompt must say it never clicks Connect, Send or Withdraw, and stops at any LinkedIn checkpoint.
+   - Tell them where it shows up: the **People** switch at the top of the tracker, and that saying "send outreach" starts a supervised send.
 
 For any scheduled task created, write the prompt to be fully self-contained (each run has no memory): include the user's folder paths and the rules from the corresponding skill in this plugin. Recommend the user click "Run now" once per task to pre-approve its tools.
 
@@ -97,4 +106,4 @@ Verify every line; fix anything that fails before finishing:
 3. `<root>/Resume/Master-Resume.md` exists and reflects the user's actual history.
 4. The launcher exists (or the one-sentence double-click instruction was given).
 5. Your handoff message contains no terminal commands, paths with backslash escapes, ports, or localhost URLs (unless the user is technical).
-6. You did not create any files beyond: the script's output, the four documents/templates, and START-HERE.md.
+6. You did not create any files beyond: the script's output, the four documents/templates, START-HERE.md, and (only if the user opted into referral outreach) `Referral/Referral-Note.md`.

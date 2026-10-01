@@ -23,5 +23,17 @@ shortcut.)
 ## The files
 - `Job-Thesis.md` — what "a fit" means; edit anytime, automations follow it.
 - `Resume/Master-Resume.md` — canonical resume; tailored copies derive from it.
-- `Job Tracker App/data.json` — the single source of truth for the board.
-  Git-versioned; rolling backups in `Job Tracker App/backups/`.
+- `Data/data.json` — the single source of truth for the board (and
+  `Data/contacts.json` for the People tab), kept apart from the app.
+  Git-versioned; rolling backups in `Data/backups/`.
+
+## Referral outreach (optional — keep this section only if it's set up)
+
+1. **Every morning** the outreach prep adds new LinkedIn roles to Screening. For companies in **To Apply**, it finds people likely to refer you and drafts messages. It never sends anything.
+2. **Switch the tracker to People** (Jobs | People, top right):
+   - **Approve** the people you want to connect with. Use **+ Add person** for someone you already know at a company.
+   - Tick **Send with a note** for the people worth one (LinkedIn's free plan allows only a few notes a month).
+   - For connected people, check the drafted ask, pick the resume (tailored, base, or upload a PDF), and tick **Approve ask**.
+3. **Say "send outreach"** to Claude. You'll see the exact list of requests and messages first, and nothing goes out until you say yes.
+
+Settings (default resume, note length, pacing, optional limits) are in `Job Tracker App/outreach-config.json`.

@@ -8,9 +8,9 @@ description: Scan job boards for new openings matching the user's job thesis, de
 Find newly posted openings that fit the user's thesis, then (1) write a dated review file and (2) append genuinely new roles to the tracker.
 
 ## Ground rules
-- `<root>` is the user's job-hunt folder (contains `Job-Thesis.md` and `Job Tracker App/data.json`). If unknown, ask, or locate with: `find ~ -maxdepth 4 -name data.json -path '*Job Tracker App*'`.
-- `data.json` is the ONLY data store. Never modify `index.html`. Never create `.bak` files. If the app folder is a git repo, commit changes; if not, skip git silently — it is optional.
-- WRITE PATH: if the tracker server is running (`curl -s -m 2 http://localhost:8787/health` returns ok — check from the host if your shell is sandboxed), an open tracker tab will re-POST its in-memory array on the user's next board action, silently clobbering direct disk edits. When the server is up, write THROUGH it: GET `/data.json`, mutate the array, POST the FULL array to `/save` (Content-Type: application/json), and tell the user to refresh the tracker tab (Cmd-R) before touching the board. Only edit data.json directly when the health check fails.
+- `<root>` is the user's job-hunt folder (contains `Job-Thesis.md` and `Job Tracker App/`). If unknown, ask, or locate with: `find ~ -maxdepth 4 -name Job-Thesis.md`. The data file is `<root>/Data/data.json` (installs from before v0.3.0 keep it at `<root>/Job Tracker App/data.json` — use whichever exists; the server's `/data.json` always serves the right one).
+- `data.json` is the ONLY data store. Never modify `index.html`. Never create `.bak` files. Git is optional (see Step 5).
+- WRITE PATH: if the tracker server is running (`curl -s -m 2 http://localhost:8787/health` returns ok — check from the host if your shell is sandboxed), an open tracker tab will re-POST its in-memory array on the user's next board action, silently clobbering direct disk edits. When the server is up, write THROUGH it: GET `/data.json`, mutate the array, POST the FULL array to `/save` (Content-Type: application/json), An open tracker tab reloads the latest when the user switches back to it (older versions: tell the user to refresh it). Only edit data.json directly when the health check fails.
 - Never fabricate listings. If zero new roles, say so.
 
 ## Step 1 — Read the thesis
@@ -42,7 +42,7 @@ Read, parse, append, write valid JSON preserving all existing entries. New entry
   "contact": "", "lastContact": "", "nextFollowup": "", "salary": "",
   "excitement": "", "fitScore": "<0-100>", "notes": "<tier + fit why + verify flags>", "source": "<board>" }
 ```
-Status exactly `"Screening"`. Set `dateAdded` to today's date (the scrub run date) so the card shows when it landed in Screening. VALIDATE after writing: JSON parses, length grew by exactly the appended count, no pre-existing entry changed. Then best-effort: `git -C "<root>/Job Tracker App" add data.json && git commit -m "job-scrub: add N roles"`.
+Status exactly `"Screening"`. Set `dateAdded` to today's date (the scrub run date) so the card shows when it landed in Screening. VALIDATE after writing: JSON parses, length grew by exactly the appended count, no pre-existing entry changed. Then commit best-effort wherever git is set up (skip silently if it isn't): if `<root>` is a git repo, `git -C "<root>" add -A -- Data "Job Listings" New-Openings-*.md && git -C "<root>" commit -m "job-scrub: add N roles"`; on older installs where only `Job Tracker App/` is a repo, `git -C "<root>/Job Tracker App" add -A . && git -C "<root>/Job Tracker App" commit -m "job-scrub: add N roles"`.
 
 ## Step 6 — Report
 How many new roles, the Tier A standouts, link to the review file. New roles appear in the app's Screening column on next load.

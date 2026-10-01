@@ -1,0 +1,15 @@
+{
+  "maxRequestsPerDay": null,
+  "maxRequestsPerWeek": null,
+  "noteSelection": "manual",
+  "noteBudgetPerMonth": null,
+  "noteCharLimit": 200,
+  "maxProfileViewsPerRun": 40,
+  "contactsPerCompany": 5,
+  "minSendGapSeconds": 20,
+  "maxSendGapSeconds": 60,
+  "followupAfterDays": 6,
+  "staleInviteDays": 21,
+  "defaultAttachment": "tailored",
+  "baseResumePath": ""
+}
